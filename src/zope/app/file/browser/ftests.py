@@ -15,15 +15,20 @@
 
 $Id$
 """
+
+import re
 import unittest
 from xml.sax.saxutils import escape
 from StringIO import StringIO
+from zope.testing import renormalizing
 
+from zope.app.testing import functional
 from zope.app.testing.functional import BrowserTestCase
 from zope.app.file.file import File
 from zope.app.file.image import Image
 from zope.app.file.tests.test_image import zptlogo
 from zope.app.file.testing import AppFileLayer
+
 
 class FileTest(BrowserTestCase):
 
@@ -230,8 +235,6 @@ class ImageTest(BrowserTestCase):
         image = root['test.gif']
         self.assertEqual(image.data, self.content)
 
-
-
     def testUploadForm(self):
         self.addImage()
         response = self.publish(
@@ -302,13 +305,19 @@ class ImageTest(BrowserTestCase):
         self.assert_('<iframe src="."' in body)
         self.checkForBrokenLinks(body, '/image/@@preview.html', 'mgr:mgrpw')
 
+
+checker = renormalizing.RENormalizing([
+    (re.compile(r"HTTP/1\.1 200 .*"), "HTTP/1.1 200 OK"),
+    (re.compile(r"HTTP/1\.1 303 .*"), "HTTP/1.1 303 See Other"),
+    ])
+
+
 def test_suite():
-    from zope.app.testing import functional
     FileTest.layer = AppFileLayer
     ImageTest.layer = AppFileLayer
-    url = functional.FunctionalDocFileSuite('url.txt')
+    url = functional.FunctionalDocFileSuite('url.txt', checker=checker)
     url.layer = AppFileLayer
-    file = functional.FunctionalDocFileSuite('file.txt')
+    file = functional.FunctionalDocFileSuite('file.txt', checker=checker)
     file.layer = AppFileLayer
     return unittest.TestSuite((
         unittest.makeSuite(FileTest),
@@ -316,6 +325,7 @@ def test_suite():
         url,
         file,
         ))
+
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')
