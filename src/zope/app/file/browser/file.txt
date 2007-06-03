@@ -211,7 +211,6 @@ So you can use ASCII text.
   >>> print http(r"""
   ... POST /sample.txt/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... Content-Length: ...
   ... Content-Type: multipart/form-data; boundary=---------------------------165727764114325486311042046845
   ...
   ... -----------------------------165727764114325486311042046845
@@ -285,7 +284,6 @@ We can also use non-ASCII charactors in text file.
   >>> print http("""
   ... POST /sample.txt/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... Content-Length: ...
   ... Content-Type: multipart/form-data; boundary=---------------------------165727764114325486311042046845
   ...
   ... -----------------------------165727764114325486311042046845
@@ -359,7 +357,6 @@ And you can explicitly specify the charset. Note that the browser form is always
   >>> print http("""
   ... POST /sample.txt/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... Content-Length: ...
   ... Content-Type: multipart/form-data; boundary=---------------------------165727764114325486311042046845
   ...
   ... -----------------------------165727764114325486311042046845
@@ -436,7 +433,6 @@ the characters.
   >>> print http("""
   ... POST /sample.txt/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... Content-Length: ...
   ... Content-Type: multipart/form-data; boundary=---------------------------165727764114325486311042046845
   ...
   ... -----------------------------165727764114325486311042046845
@@ -490,7 +486,6 @@ Likewise, the user is not allowed to specify a character set that is not support
   >>> print http("""
   ... POST /sample.txt/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... Content-Length: ...
   ... Content-Type: multipart/form-data; boundary=---------------------------165727764114325486311042046845
   ...
   ... -----------------------------165727764114325486311042046845
