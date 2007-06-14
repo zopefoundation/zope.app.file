@@ -160,6 +160,18 @@ class TestSized(unittest.TestCase):
         from zope.app.file.image import getImageInfo
         t, w, h = getImageInfo("\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xdb\x00C")
 
+    def test_getImageInfo_bmp(self):
+        from zope.app.file.image import getImageInfo
+        t, w, h = getImageInfo('BMl\x05\x00\x00\x00\x00\x00\x006\x04\x00\x00('
+                               '\x00\x00\x00\x10\x00\x00\x00\x10\x00\x00\x00'
+                               '\x01\x00\x08\x00\x01\x00\x00\x006\x01\x00\x00'
+                               '\x12\x0b\x00\x00\x12\x0b\x00\x00\x00\x01\x00'
+                               '... and so on ...')
+        self.assertEqual(t, "image/x-ms-bmp")
+        self.assertEqual(w, 16)
+        self.assertEqual(h, 16)
+
+
 def test_suite():
     return unittest.TestSuite((
         unittest.makeSuite(TestImage),

@@ -152,5 +152,11 @@ def getImageInfo(data):
         except ValueError:
             pass
 
+    # handle BMPs
+    elif (size >= 30) and data.startswith('BM'):
+        kind = struct.unpack("<H", data[14:16])[0]
+        if kind == 40: # Windows 3.x bitmap
+            content_type = 'image/x-ms-bmp'
+            width, height = struct.unpack("<LL", data[18:26])
 
     return content_type, width, height
