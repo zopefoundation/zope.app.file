@@ -26,7 +26,7 @@ from zope.app.file.file import File
 from zope.app.file.interfaces import IFile
 from zope.app.file.i18n import ZopeMessageFactory as _
 from zope.dublincore.interfaces import IZopeDublinCore
-import zope.datetime 
+import zope.datetime
 
 import time
 from datetime import datetime
@@ -64,7 +64,7 @@ class FileView(object):
 
         If the file is adaptable to IZopeDublinCore the
         "Last-Modified" header is also set.
-        
+
         >>> request.response.getHeader('Last-Modified') is None
         True
 
@@ -78,20 +78,20 @@ class FileView(object):
         'data of file'
         >>> request.response.getHeader('Last-Modified')
         'Sun, 01 Jan 2006 00:00:00 GMT'
-        
+
         If the "If-Modified-Since" header is set and is newer a 304
         status is returned and the value is empty.
-        
+
         >>> modified = datetime(2007,12,31,tzinfo=pytz.utc)
         >>> modHeader = zope.datetime.rfc1123_date(zope.datetime.time(modified.isoformat()))
         >>> request = TestRequest(IF_MODIFIED_SINCE=modHeader)
-        
+
         >>> view = FileTestView(aFile,request)
         >>> view.show()
         ''
         >>> request.response.getStatus()
         304
-        
+
         """
 
         if self.request is not None:
@@ -105,7 +105,7 @@ class FileView(object):
             modified=None
         if modified is None or not isinstance(modified,datetime):
             return self.context.data
-        
+
         header= self.request.getHeader('If-Modified-Since', None)
         lmt = zope.datetime.time(modified.isoformat())
         if header is not None:
