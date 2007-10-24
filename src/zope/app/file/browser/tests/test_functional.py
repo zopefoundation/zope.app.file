@@ -315,9 +315,9 @@ checker = renormalizing.RENormalizing([
 def test_suite():
     FileTest.layer = AppFileLayer
     ImageTest.layer = AppFileLayer
-    url = functional.FunctionalDocFileSuite('url.txt', checker=checker)
+    url = functional.FunctionalDocFileSuite('../url.txt', checker=checker)
     url.layer = AppFileLayer
-    file = functional.FunctionalDocFileSuite('file.txt', checker=checker)
+    file = functional.FunctionalDocFileSuite('../file.txt', checker=checker)
     file.layer = AppFileLayer
     return unittest.TestSuite((
         unittest.makeSuite(FileTest),
