@@ -2,10 +2,13 @@
 CHANGES
 =======
 
-3.4.2 (unreleased)
+3.4.2 (2007-11-09)
 ------------------
 
-- ...
+- Include information about which attributes changed in the
+  ``IObjectModifiedEvent`` after upload.
+
+  This fixes https://bugs.launchpad.net/zope3/+bug/98483.
 
 3.4.1 (2007-10-31)
 ------------------

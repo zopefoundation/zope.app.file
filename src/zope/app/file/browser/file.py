@@ -339,12 +339,12 @@ class FileEdit(object):
         We install an event logger so we can see the events generated.
 
         >>> def eventLog(event):
-        ...    print event
+        ...    print event.__class__.__name__, event.descriptions[0].attributes
         >>> zope.event.subscribers.append(eventLog)
 
         >>> view.setData({'contentType': 'text/plain; charset=ISO-8859-13',
         ...               'data': u'text \u0105'}) # doctest:+ELLIPSIS
-        <zope.app.event.objectevent.ObjectModifiedEvent object at ...>
+        ObjectModifiedEvent ('data', 'contentType')
         u'Updated on ${date_time}'
 
         >>> view.context.contentType
@@ -441,17 +441,27 @@ class FileEdit(object):
     def setData(self, data):
         charset = extractCharset(data['contentType'])
         try:
-            self.context.data = data['data'].encode(charset)
+            encodeddata = data['data'].encode(charset)
         except LookupError:
             raise UnknownCharset(charset)
         except UnicodeEncodeError:
             raise CharsetTooWeak(charset)
-        self.context.contentType = data['contentType']
+        
+        modified = []
+        if encodeddata != self.context.data:
+            self.context.data = encodeddata
+            modified.append('data')
+        
+        if self.context.contentType != data['contentType']:
+            self.context.contentType = data['contentType']
+            modified.append('contentType')
         formatter = self.request.locale.dates.getFormatter('dateTime',
                                                            'medium')
-
-        event = lifecycleevent.ObjectModifiedEvent(self.context)
-        zope.event.notify(event)
+        if modified:
+            event = lifecycleevent.ObjectModifiedEvent(
+                self.context,
+                lifecycleevent.Attributes(IFile, *modified))
+            zope.event.notify(event)
 
         return _("Updated on ${date_time}",
                  mapping={'date_time': formatter.format(datetime.utcnow())})
