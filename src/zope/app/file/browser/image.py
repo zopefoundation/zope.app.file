@@ -18,8 +18,8 @@ $Id$
 __docformat__ = 'restructuredtext'
 
 from zope.size.interfaces import ISized
-from zope.app import zapi
 from zope.app.file.browser.file import FileView
+from zope.traversing.browser.absoluteurl import absoluteURL
 
 
 class ImageData(FileView):
@@ -59,8 +59,7 @@ class ImageData(FileView):
             height = str(int(round(int(height) * ydelta)))
 
         if self.request is not None:
-            result = '<img src="%s"' % zapi.absoluteURL(self.context,
-                                                        self.request)
+            result = '<img src="%s"' % absoluteURL(self.context, self.request)
         else:
             result = '<img '
 
