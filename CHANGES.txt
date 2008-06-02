@@ -5,6 +5,9 @@ CHANGES
 3.5.0 (unreleased)
 ------------------
 
+- Using IDCTimes interface instead of IZopeDublinCore to determine the
+  modification date of a file.
+
 3.4.2 (2007-11-09)
 ------------------
 
