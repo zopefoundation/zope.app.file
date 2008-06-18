@@ -25,7 +25,7 @@ from zope.exceptions.interfaces import UserError
 from zope.app.file.file import File
 from zope.app.file.interfaces import IFile
 from zope.app.file.i18n import ZopeMessageFactory as _
-from zope.dublincore.interfaces import IZopeDublinCore
+from zope.dublincore.interfaces import IDCTimes
 import zope.datetime
 
 import time
@@ -39,8 +39,8 @@ class FileView(object):
 
         """Sets various headers if the request is present and returns the
         data of the file. If the "If-Modified-Since" header is set and
-        the context implements IZopeDublinCore, data is only returned if
-        the modification date of the context is new than the date in the
+        the context is adaptable to IDCTimes, data is only returned if
+        the modification date of the context is newer than the date in the
         "If-Modified-Since" header
         >>> from zope.publisher.browser import BrowserView, TestRequest
         >>> class FileTestView(FileView, BrowserView): pass
@@ -62,14 +62,15 @@ class FileView(object):
         >>> request.response.getHeader('Content-Length')
         '12'
 
-        If the file is adaptable to IZopeDublinCore the
-        "Last-Modified" header is also set.
+        If the file is adaptable to IDCTimes the "Last-Modified" header is also
+        set.
 
         >>> request.response.getHeader('Last-Modified') is None
         True
 
         For the test we just declare that our file provides
         IZopeDublinCore
+        >>> from zope.dublincore.interfaces import IZopeDublinCore
         >>> from zope.interface import directlyProvides
         >>> directlyProvides(aFile,IZopeDublinCore)
         >>> request = TestRequest()
@@ -100,7 +101,7 @@ class FileView(object):
             self.request.response.setHeader('Content-Length',
                                             self.context.getSize())
         try:
-            modified = IZopeDublinCore(self.context).modified
+            modified = IDCTimes(self.context).modified
         except TypeError:
             modified=None
         if modified is None or not isinstance(modified,datetime):
