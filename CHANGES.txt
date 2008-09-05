@@ -2,8 +2,15 @@
 CHANGES
 =======
 
-3.4.4 (unreleased)
+3.4.5 (unreleased)
+
+-
+
+3.4.4 (2008-09-05)
 ------------------
+
+- Bug: Get actual filename instead of full filesystem path when adding file/image
+  using Internet Explorer.
 
 3.4.3 (2008-06-18)
 ------------------

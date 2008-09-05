@@ -19,7 +19,7 @@ __docformat__ = 'restructuredtext'
 
 from zope.size.interfaces import ISized
 from zope.app import zapi
-from zope.app.file.browser.file import FileView
+from zope.app.file.browser.file import FileView, cleanupFileName
 
 
 class ImageData(FileView):
@@ -108,6 +108,6 @@ class ImageAdd(object):
             filename = getattr(self.request.form.get("field.data"),
                                "filename", None)
             if filename is not None:
-                self.request.form["add_input_name"] = filename
+                self.request.form["add_input_name"] = cleanupFileName(filename)
 
         return super(ImageAdd,self).update()
