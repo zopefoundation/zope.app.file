@@ -122,6 +122,8 @@ class FileView(object):
 
         return self.context.data
 
+def cleanupFileName(filename):
+    return filename.split('\\')[-1].split('/')[-1]
 
 class FileUpdateView(object):
 
@@ -135,6 +137,7 @@ class FileUpdateView(object):
             filename = getattr(form["field.data"], "filename", None)
             contenttype = form.get("field.contentType")
             if filename:
+                filename = cleanupFileName(filename)
                 if not contenttype:
                     contenttype = guess_content_type(filename)[0]
                 if not form.get("add_input_name"):

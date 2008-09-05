@@ -5,6 +5,9 @@ CHANGES
 3.5.0 (unreleased)
 ------------------
 
+- Bug: Get actual filename instead of full filesystem path when adding file/image
+  using Internet Explorer.
+
 - Using IDCTimes interface instead of IZopeDublinCore to determine the
   modification date of a file.
 

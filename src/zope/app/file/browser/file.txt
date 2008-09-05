@@ -127,6 +127,57 @@ Let's make sure the (binary) content of the file is correct
   >>> response.getBody().encode('base64')
   'H4sICMtI6kIAA2hlbGxvLnR4dADLSM3JyecCACAwOjYGAAAA\n'
 
+Also, lets test a (bad) filename with full path that generates MS Internet Explorer,
+Zope should process it successfully and get the actual filename. Let's upload the
+same file with bad filename.
+
+  >>> print http("""
+  ... POST /+/zope.app.file.File%3D HTTP/1.1
+  ... Authorization: Basic mgr:mgrpw
+  ... Content-Type: multipart/form-data; boundary=---------------------------73793505419963331401738523176
+  ...
+  ... -----------------------------73793505419963331401738523176
+  ... Content-Disposition: form-data; name="field.contentType"
+  ...
+  ... application/octet-stream
+  ... -----------------------------73793505419963331401738523176
+  ... Content-Disposition: form-data; name="field.data"; filename="c:\\windows\\test.gz"
+  ... Content-Type: application/x-gzip
+  ...
+  ... \x1f\x8b\x08\x08\xcb\x48\xea\x42\x00\x03\x68\x65\x6c\x6c\x6f\x2e\
+  ... \x74\x78\x74\x00\xcb\x48\xcd\xc9\xc9\xe7\x02\x00\x20\x30\x3a\x36\
+  ... \x06\x00\x00\x00
+  ... -----------------------------73793505419963331401738523176
+  ... Content-Disposition: form-data; name="UPDATE_SUBMIT"
+  ...
+  ... Add
+  ... -----------------------------73793505419963331401738523176
+  ... Content-Disposition: form-data; name="add_input_name"
+  ...
+  ...
+  ... -----------------------------73793505419963331401738523176--
+  ... """)
+  HTTP/1.1 303 See Other
+  Content-Length: ...
+  Content-Type: text/html;charset=utf-8
+  Location: http://localhost/@@contents.html
+  <BLANKLINE>
+  ...
+
+The file should be saved as "test.gz", let's check it name and contents.
+
+  >>> response = http("""
+  ... GET /test.gz HTTP/1.1
+  ... """)
+  >>> print response
+  HTTP/1.1 200 OK
+  Content-Length: 36
+  Content-Type: application/octet-stream
+  <BLANKLINE>
+  ...
+
+  >>> response.getBody().encode('base64')
+  'H4sICMtI6kIAA2hlbGxvLnR4dADLSM3JyecCACAwOjYGAAAA\n'
 
 Text Files
 ----------
