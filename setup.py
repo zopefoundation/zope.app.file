@@ -22,7 +22,7 @@ def read(*rnames):
     return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
 
 setup(name='zope.app.file',
-      version = '3.4.6',
+      version = '3.4.7dev',
       author='Zope Corporation and Contributors',
       author_email='zope-dev@zope.org',
       description='File and Image -- Zope 3 Content Components',
