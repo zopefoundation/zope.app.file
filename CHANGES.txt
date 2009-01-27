@@ -2,11 +2,26 @@
 CHANGES
 =======
 
-3.5.0 (unreleased)
+3.4.6 (2009-01-27)
+------------------
+
+- Remove zope.app.zapi dependency again. Previous release
+  was wrong. We removed the zope.app.zapi uses before, so
+  we don't need it anymore.
+
+3.4.5 (2009-01-27)
+------------------
+
+- added missing dependency: zope.app.zapi
+
+3.4.4 (2008-09-05)
 ------------------
 
 - Bug: Get actual filename instead of full filesystem path when adding file/image
   using Internet Explorer.
+
+3.4.3 (2008-06-18)
+------------------
 
 - Using IDCTimes interface instead of IZopeDublinCore to determine the
   modification date of a file.
