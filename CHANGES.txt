@@ -2,9 +2,15 @@
 CHANGES
 =======
 
-3.4.5 (unreleased)
+3.4.6 (unreleased)
+------------------
 
--
+- 
+
+3.4.5 (2009-01-27)
+------------------
+
+- added missing dependency: zope.app.zapi
 
 3.4.4 (2008-09-05)
 ------------------
