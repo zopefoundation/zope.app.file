@@ -6,15 +6,15 @@
 
   <!-- setting up content types -->
 
-  <interface 
-      interface=".interfaces.IFile" 
+  <interface
+      interface=".interfaces.IFile"
       type="zope.app.content.interfaces.IContentType"
-      /> 
+      />
 
-  <interface 
-      interface=".interfaces.IImage" 
+  <interface
+      interface=".interfaces.IImage"
       type="zope.app.content.interfaces.IContentType"
-      /> 
+      />
 
   <permission
       id="zope.AddImages"
@@ -74,26 +74,28 @@
       for=".interfaces.IImage"
       />
 
-  <adapter 
+  <adapter
       for=".interfaces.IFile"
       provides="zope.filerepresentation.interfaces.IReadFile"
       factory=".file.FileReadFile"
       permission="zope.View"
       />
 
-  <adapter 
+  <adapter
       for=".interfaces.IFile"
       provides="zope.filerepresentation.interfaces.IWriteFile"
       factory=".file.FileWriteFile"
       permission="zope.ManageContent"
       />
 
+  <!-- FIXME: This should be register on an higher level container
+  than folder -->
   <adapter
-      for="zope.app.folder.interfaces.IFolder"
-      provides="zope.filerepresentation.interfaces.IFileFactory"
-      factory=".image.FileFactory"
-      permission="zope.ManageContent"
-      />
+     for="zope.site.interfaces.IFolder"
+     provides="zope.filerepresentation.interfaces.IFileFactory"
+     factory=".image.FileFactory"
+     permission="zope.ManageContent"
+     />
 
 
   <!-- include browser package -->
