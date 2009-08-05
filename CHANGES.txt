@@ -6,6 +6,7 @@ CHANGES
 ------------------
 
 - Fix ftesting.zcml due to zope.securitypolicy update.
+- Added missing dependency on transaction.
 
 3.5.0 (2009-01-31)
 ------------------
