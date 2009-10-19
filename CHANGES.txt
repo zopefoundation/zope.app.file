@@ -7,6 +7,8 @@ CHANGES
 
 - Fix ftesting.zcml due to zope.securitypolicy update.
 - Added missing dependency on transaction.
+- Import content-type parser from zope.contenttype, reducing zope.publisher to
+  a test dependency.
 
 3.5.0 (2009-01-31)
 ------------------

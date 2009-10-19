@@ -18,7 +18,7 @@ $Id$
 import zope.event
 from zope import lifecycleevent
 from zope.contenttype import guess_content_type
-from zope.publisher import contenttype
+import zope.contenttype.parse
 from zope.schema import Text
 from zope.exceptions.interfaces import UserError
 
@@ -497,7 +497,7 @@ def extractCharset(content_type):
 
     """
     if content_type and content_type.strip():
-        major, minor, params = contenttype.parse(content_type)
+        major, minor, params = zope.contenttype.parse.parse(content_type)
         return params.get("charset", "UTF-8")
     else:
         return "UTF-8"
