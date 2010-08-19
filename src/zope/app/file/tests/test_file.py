@@ -15,13 +15,7 @@
 
 $Id$
 """
-import unittest
-from zope.testing.doctestunit import DocTestSuite
+import doctest
 
 def test_suite():
-    return unittest.TestSuite((
-        DocTestSuite('zope.app.file.file'),
-        ))
-
-if __name__ == '__main__':
-    unittest.main()
+    return doctest.DocTestSuite('zope.app.file.file')
