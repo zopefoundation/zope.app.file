@@ -1,12 +1,11 @@
-=======
-CHANGES
+Changes
 =======
 
 3.5.2 (unreleased)
 ------------------
 
-- Updated ``ftesting.zcml`` to use the permission names now exported by
-  ``zope.dublincore``.
+- Updated ``ftesting.zcml`` to use the new permission names exported by
+  ``zope.dublincore`` 3.7.
 
 - Using python's `doctest` instead of deprecated `zope.testing.doctest`.
 

@@ -33,10 +33,7 @@ setup(name='zope.app.file',
       description='File and Image -- Zope 3 Content Components',
       long_description=(
           read('README.txt')
-          + '\n\n' +
-          'Detailed Documentation\n' +
-          '----------------------\n'
-          + '\n\n' +
+          + '\n\n.. contents::\n\n' +
           read('src', 'zope', 'app', 'file', 'browser', 'file.txt')
           + '\n\n' +
           read('src', 'zope', 'app', 'file', 'browser', 'url.txt')
@@ -71,7 +68,7 @@ setup(name='zope.app.file',
                         'zope.app.publication',
                         'zope.contenttype>=3.5.0dev',
                         'zope.datetime',
-                        'zope.dublincore>=3.7.0',
+                        'zope.dublincore>=3.7',
                         'zope.event',
                         'zope.exceptions',
                         'zope.filerepresentation',
