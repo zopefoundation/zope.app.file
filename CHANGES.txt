@@ -6,6 +6,8 @@ Changes
 
 - Removed ZPKG slugs and ZCML ones.
 
+- Moved a functional test here from `zope.app.http`.
+
 
 3.6.0 (2010-08-19)
 ------------------
