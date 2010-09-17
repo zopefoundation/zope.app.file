@@ -4,7 +4,7 @@ Changes
 3.6.1 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Removed ZPKG slugs and ZCML ones.
 
 
 3.6.0 (2010-08-19)
