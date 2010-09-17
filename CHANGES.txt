@@ -1,7 +1,7 @@
 Changes
 =======
 
-3.6.1 (unreleased)
+3.6.1 (2010-09-17)
 ------------------
 
 - Removed ZPKG slugs and ZCML ones.
