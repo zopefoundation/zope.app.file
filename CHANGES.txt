@@ -8,6 +8,8 @@ Changes
 
 - Moved a functional test here from `zope.app.http`.
 
+- Using Python's ``doctest`` instead of deprecated ``zope.testing.doctest``.
+
 
 3.6.0 (2010-08-19)
 ------------------
