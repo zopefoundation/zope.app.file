@@ -125,8 +125,6 @@ class File(Persistent):
     _size = 0
 
     def __init__(self, data=b'', contentType=''):
-        if not isinstance(data, (bytes, text_type)) and not hasattr(data, 'seek'):
-            raise TypeError("Data must be bytes or string or file-like", data)
         self.data = data
         self.contentType = contentType
 
@@ -162,7 +160,7 @@ class File(Persistent):
         seek(0, 2)
         size = end = data.tell()
 
-        if size <= 2*MAXCHUNKSIZE:
+        if size <= 2 * MAXCHUNKSIZE:
             seek(0)
             if size < MAXCHUNKSIZE:
                 self._data, self._size = read(size), size

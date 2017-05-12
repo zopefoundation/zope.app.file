@@ -29,7 +29,7 @@ from zope.app.file.i18n import ZopeMessageFactory as _
 from zope.dublincore.interfaces import IDCTimes
 import zope.datetime
 
-import time
+
 from datetime import datetime
 
 __docformat__ = 'restructuredtext'
@@ -97,6 +97,13 @@ class FileView(object):
         >>> request.response.getStatus()
         304
 
+        An invalid value for that header is ignored.
+        >>> request = TestRequest(IF_MODIFIED_SINCE="Not Valid")
+
+        >>> view = FileTestView(aFile,request)
+        >>> view.show() == MyFile.data
+        True
+
         """
 
         if self.request is not None:
@@ -117,7 +124,7 @@ class FileView(object):
             header = header.split(';')[0]
             try:
                 mod_since = int(zope.datetime.time(header))
-            except ValueError:
+            except zope.datetime.SyntaxError:
                 mod_since = None
             if mod_since is not None:
                 if lmt <= mod_since:
@@ -298,7 +305,7 @@ class FileUpload(FileUpdateView):
         # Update *only* if a new value is specified
         if data:
             self.context.data = data
-            descriptor.attributes += "data",
+            descriptor.attributes += ("data",)
 
         event = lifecycleevent.ObjectModifiedEvent(self.context, descriptor)
         zope.event.notify(event)

@@ -55,10 +55,8 @@ class BrowserTestCase(unittest.TestCase):
         pass
 
     def publish(self, path, basic=None, form=None, headers=None):
-        if basic:
-            self._testapp.authorization = ('Basic', tuple(basic.split(':')))
-        else:
-            self._testapp.authorization = None
+        assert basic
+        self._testapp.authorization = ('Basic', tuple(basic.split(':')))
         env = {'wsgi.handleErrors': False}
         if form:
             upload_files = []

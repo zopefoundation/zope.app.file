@@ -121,7 +121,7 @@ def getImageInfo(data):
         height = int(h)
 
     # Maybe this is for an older PNG version.
-    elif (size >= 16) and data.startswith(b'\211PNG\r\n\032\n'):
+    elif (size >= 16) and data.startswith(b'\211PNG\r\n\032\n'): # pragma: no cover
         # Check to see if we have the right content type
         content_type = 'image/png'
         w, h = struct.unpack(">LL", data[8:16])
@@ -129,7 +129,7 @@ def getImageInfo(data):
         height = int(h)
 
     # handle JPEGs
-    elif (size >= 2) and data.startswith(b'\377\330'):
+    elif (size >= 2) and data.startswith(b'\xff\xd8'):
         content_type = 'image/jpeg'
         jpeg = BytesIO(data)
         jpeg.read(2)
@@ -137,10 +137,12 @@ def getImageInfo(data):
         try:
             w = -1
             h = -1
-            while (b and ord(b) != 0xDA):
-                while (ord(b) != 0xFF): b = jpeg.read(1)
-                while (ord(b) == 0xFF): b = jpeg.read(1)
-                if (ord(b) >= 0xC0 and ord(b) <= 0xC3):
+            while b and ord(b) != 0xDA:
+                while ord(b) != 0xFF:
+                    b = jpeg.read(1)
+                while ord(b) == 0xFF:
+                    b = jpeg.read(1)
+                if ord(b) >= 0xC0 and ord(b) <= 0xC3:
                     jpeg.read(3)
                     h, w = struct.unpack(b">HH", jpeg.read(4))
                     break
@@ -149,9 +151,7 @@ def getImageInfo(data):
                 b = jpeg.read(1)
             width = int(w)
             height = int(h)
-        except struct.error:
-            pass
-        except ValueError:
+        except (struct.error, ValueError): # pragma: no cover
             pass
 
     # handle BMPs
