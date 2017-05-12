@@ -13,18 +13,27 @@
 ##############################################################################
 """Tests for zope.app.file.browser.file.
 
-$Id$
 """
+import re
+from zope.testing import renormalizing
 
-from zope.app.testing import placelesssetup
+from zope.component.testing import setUp, tearDown
 import doctest
 import unittest
 
 
 def test_suite():
-    return doctest.DocTestSuite("zope.app.file.browser.file",
-                                setUp=placelesssetup.setUp,
-                                tearDown=placelesssetup.tearDown)
+    checker = renormalizing.RENormalizing((
+        (re.compile(r"u'(.*)'"), r"'\1'"),
+    ))
+    return doctest.DocTestSuite(
+        "zope.app.file.browser.file",
+        setUp=setUp,
+        tearDown=tearDown,
+        checker=checker,
+    optionflags=(doctest.ELLIPSIS
+                 | doctest.NORMALIZE_WHITESPACE
+                 | renormalizing.IGNORE_EXCEPTION_MODULE_IN_PYTHON2))
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main(defaultTest="test_suite")

@@ -13,13 +13,12 @@
 ##############################################################################
 """Test Image Data handling
 
-$Id$
 """
 import unittest
 
-from zope.component import adapts, provideAdapter
+from zope.component import adapter, provideAdapter
 from zope.component.testing import PlacelessSetup
-from zope.interface import implements
+from zope.interface import implementer
 from zope.app.file.image import Image
 from zope.app.file.browser.image import ImageData
 from zope.traversing.browser.interfaces import IAbsoluteURL
@@ -27,9 +26,9 @@ from zope.traversing.browser.interfaces import IAbsoluteURL
 class FakeRequest(object):
     pass
 
+@adapter(Image, FakeRequest)
+@implementer(IAbsoluteURL)
 class StubAbsoluteURL(object):
-    adapts(Image, FakeRequest)
-    implements(IAbsoluteURL)
 
     def __init__(self, *objects):
         pass
@@ -42,11 +41,11 @@ class StubAbsoluteURL(object):
 class ImageDataTest(PlacelessSetup, unittest.TestCase):
 
     def testData(self):
-        image = Image('Data')
+        image = Image(b'Data')
         id = ImageData()
         id.context = image
         id.request = None
-        self.assertEqual(id(), 'Data')
+        self.assertEqual(id(), b'Data')
 
     def testTag(self):
         provideAdapter(StubAbsoluteURL)

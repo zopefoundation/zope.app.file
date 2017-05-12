@@ -13,7 +13,6 @@
 ##############################################################################
 """Define view component for naive file editing.
 
-$Id$
 """
 __docformat__ = 'restructuredtext'
 

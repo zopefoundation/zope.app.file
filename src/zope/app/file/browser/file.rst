@@ -6,33 +6,19 @@ Adding Files
 
 You can add File objects from the common tasks menu in the ZMI.
 
-  >>> print http(r"""
+  >>> result = http(r"""
   ... GET /@@contents.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """)
-  HTTP/1.1 200 OK
-  Content-Length: ...
-  Content-Type: text/html;charset=utf-8
-  <BLANKLINE>
-  ...
-      <title>Z3: </title>
-  ...
-                          <div class="box" id="commonTasks">
-                              <h4>Add:</h4>
-                              <div class="body">
-  ...
-      <div class="content...">
-        <a href="http://localhost/@@+/action.html?type_name=zope.app.file.File"
-           class="">File</a>
-      </div>
-  ...
+  >>> "http://localhost/@@+/action.html?type_name=zope.app.file.File" in str(result)
+  True
 
 Let's follow that link.
 
-  >>> print http(r"""
+  >>> print(http(r"""
   ... GET /@@+/action.html?type_name=zope.app.file.File HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... """, handle_errors=False)
+  ... """, handle_errors=False))
   HTTP/1.1 303 See Other
   Content-Length: ...
   Location: http://localhost/+/zope.app.file.File=
@@ -41,10 +27,10 @@ Let's follow that link.
 The file add form lets you specify the content type, the object name, and
 optionally upload the contents of the file.
 
-  >>> print http(r"""
+  >>> print(http(r"""
   ... GET /+/zope.app.file.File= HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... """)
+  ... """))
   HTTP/1.1 200 OK
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
@@ -76,7 +62,7 @@ Binary Files
 
 Let us upload a binary file.
 
-  >>> print http("""
+  >>> print(http(b"""
   ... POST /+/zope.app.file.File%3D HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... Content-Type: multipart/form-data; boundary=---------------------------73793505419963331401738523176
@@ -101,7 +87,7 @@ Let us upload a binary file.
   ...
   ...
   ... -----------------------------73793505419963331401738523176--
-  ... """)
+  ... """))
   HTTP/1.1 303 See Other
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
@@ -115,7 +101,7 @@ filename.
   >>> response = http("""
   ... GET /hello.txt.gz HTTP/1.1
   ... """)
-  >>> print response
+  >>> print(response)
   HTTP/1.1 200 OK
   Content-Length: 36
   Content-Type: application/octet-stream
@@ -124,14 +110,14 @@ filename.
 
 Let's make sure the (binary) content of the file is correct
 
-  >>> response.getBody().encode('base64')
-  'H4sICMtI6kIAA2hlbGxvLnR4dADLSM3JyecCACAwOjYGAAAA\n'
+  >>> response.getBody() == b'\x1f\x8b\x08\x08\xcbH\xeaB\x00\x03hello.txt\x00\xcbH\xcd\xc9\xc9\xe7\x02\x00 0:6\x06\x00\x00\x00'
+  True
 
 Also, lets test a (bad) filename with full path that generates MS Internet Explorer,
 Zope should process it successfully and get the actual filename. Let's upload the
 same file with bad filename.
 
-  >>> print http("""
+  >>> print(http(b"""
   ... POST /+/zope.app.file.File%3D HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... Content-Type: multipart/form-data; boundary=---------------------------73793505419963331401738523176
@@ -156,7 +142,7 @@ same file with bad filename.
   ...
   ...
   ... -----------------------------73793505419963331401738523176--
-  ... """)
+  ... """))
   HTTP/1.1 303 See Other
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
@@ -169,22 +155,23 @@ The file should be saved as "test.gz", let's check it name and contents.
   >>> response = http("""
   ... GET /test.gz HTTP/1.1
   ... """)
-  >>> print response
+  >>> print(response)
   HTTP/1.1 200 OK
   Content-Length: 36
   Content-Type: application/octet-stream
   <BLANKLINE>
   ...
 
-  >>> response.getBody().encode('base64')
-  'H4sICMtI6kIAA2hlbGxvLnR4dADLSM3JyecCACAwOjYGAAAA\n'
+
+  >>> response.getBody() == b'\x1f\x8b\x08\x08\xcbH\xeaB\x00\x03hello.txt\x00\xcbH\xcd\xc9\xc9\xe7\x02\x00 0:6\x06\x00\x00\x00'
+  True
 
 Text Files
 ----------
 
 Let us now create a text file.
 
-  >>> print http(r"""
+  >>> print(http(r"""
   ... POST /+/zope.app.file.File%3D HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... Content-Type: multipart/form-data; boundary=---------------------------167769037320366690221542301033
@@ -207,7 +194,7 @@ Let us now create a text file.
   ...
   ... sample.txt
   ... -----------------------------167769037320366690221542301033--
-  ... """)
+  ... """))
   HTTP/1.1 303 See Other
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
@@ -217,9 +204,9 @@ Let us now create a text file.
 
 The file is initially empty, since we did not upload anything.
 
-  >>> print http("""
+  >>> print(http("""
   ... GET /sample.txt HTTP/1.1
-  ... """)
+  ... """))
   HTTP/1.1 200 OK
   Content-Length: 0
   Content-Type: text/plain
@@ -228,10 +215,10 @@ The file is initially empty, since we did not upload anything.
 
 Since it is a text file, we can edit it directly in a web form.
 
-  >>> print http(r"""
+  >>> print(http(r"""
   ... GET /sample.txt/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... """, handle_errors=False)
+  ... """, handle_errors=False))
   HTTP/1.1 200 OK
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
@@ -259,7 +246,7 @@ Since it is a text file, we can edit it directly in a web form.
 Files of type text/plain without any charset information can contain UTF-8 text.
 So you can use ASCII text.
 
-  >>> print http(r"""
+  >>> print(http(r"""
   ... POST /sample.txt/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... Content-Type: multipart/form-data; boundary=---------------------------165727764114325486311042046845
@@ -279,7 +266,7 @@ So you can use ASCII text.
   ...
   ... Change
   ... -----------------------------165727764114325486311042046845--
-  ... """, handle_errors=False)
+  ... """, handle_errors=False))
   HTTP/1.1 200 OK
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
@@ -314,13 +301,13 @@ So you can use ASCII text.
 
 Here's the file
 
-  >>> print http(r"""
+  >>> print(http(r"""
   ... GET /sample.txt HTTP/1.1
-  ... """)
+  ... """))
   HTTP/1.1 200 OK
   Content-Length: ...
   Content-Type: text/plain
-  Last-Modified: ...  
+  Last-Modified: ...
   <BLANKLINE>
   This is a sample text file.
   <BLANKLINE>
@@ -332,7 +319,7 @@ Non-ASCII Text Files
 
 We can also use non-ASCII charactors in text file.
 
-  >>> print http("""
+  >>> print(http("""
   ... POST /sample.txt/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... Content-Type: multipart/form-data; boundary=---------------------------165727764114325486311042046845
@@ -352,7 +339,7 @@ We can also use non-ASCII charactors in text file.
   ...
   ... Change
   ... -----------------------------165727764114325486311042046845--
-  ... """)
+  ... """))
   HTTP/1.1 200 OK
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
@@ -390,7 +377,7 @@ Here's the file
   >>> response = http(r"""
   ... GET /sample.txt HTTP/1.1
   ... """)
-  >>> print response
+  >>> print(response)
   HTTP/1.1 200 OK
   Content-Length: ...
   Content-Type: text/plain
@@ -405,7 +392,7 @@ Here's the file
 
 And you can explicitly specify the charset. Note that the browser form is always UTF-8.
 
-  >>> print http("""
+  >>> print(http("""
   ... POST /sample.txt/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... Content-Type: multipart/form-data; boundary=---------------------------165727764114325486311042046845
@@ -425,7 +412,7 @@ And you can explicitly specify the charset. Note that the browser form is always
   ...
   ... Change
   ... -----------------------------165727764114325486311042046845--
-  ... """)
+  ... """))
   HTTP/1.1 200 OK
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
@@ -463,7 +450,7 @@ Here's the file
   >>> response = http(r"""
   ... GET /sample.txt HTTP/1.1
   ... """)
-  >>> print response
+  >>> print(response)
   HTTP/1.1 200 OK
   Content-Length: ...
   Content-Type: text/plain; charset=ISO-8859-1
@@ -475,13 +462,13 @@ Here's the file
 
 Body is actually encoded in ISO-8859-1, and not UTF-8
 
-  >>> response.getBody().splitlines()[-1]
+  >>> response.getBody().splitlines()[-1].decode('latin-1')
   'It now contains Latin-1 characters, e.g. \xa7 (U+00A7 SECTION SIGN).'
 
 The user is not allowed to specify a character set that cannot represent all
 the characters.
 
-  >>> print http("""
+  >>> print(http("""
   ... POST /sample.txt/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... Content-Type: multipart/form-data; boundary=---------------------------165727764114325486311042046845
@@ -501,7 +488,7 @@ the characters.
   ...
   ... Change
   ... -----------------------------165727764114325486311042046845--
-  ... """, handle_errors=False)
+  ... """, handle_errors=False))
   HTTP/1.1 200 OK
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
@@ -534,7 +521,7 @@ the characters.
 
 Likewise, the user is not allowed to specify a character set that is not supported by Python.
 
-  >>> print http("""
+  >>> print(http("""
   ... POST /sample.txt/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... Content-Type: multipart/form-data; boundary=---------------------------165727764114325486311042046845
@@ -554,7 +541,7 @@ Likewise, the user is not allowed to specify a character set that is not support
   ...
   ... Change
   ... -----------------------------165727764114325486311042046845--
-  ... """, handle_errors=False)
+  ... """, handle_errors=False))
   HTTP/1.1 200 OK
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
@@ -585,28 +572,28 @@ Likewise, the user is not allowed to specify a character set that is not support
       </form>
   ...
 
-If you trick Zope and upload a file with a content type that does not match the
-file contents, you will not be able to access the edit view.
+If you trick Zope and upload a file with a content type that does not
+match the file contents, you will not be able to access the edit view.
+(Because of `a bug in zope.app.exception
+<https://github.com/zopefoundation/zope.app.exception/issues/2>`_, we
+can't see the pretty HTML on Python 3 so we resort to looking at the
+exception. When that bug is fixed we should return to
+``handle_errors=True``.)
 
-  >>> print http(r"""
+  >>> print(http(r"""
   ... GET /hello.txt.gz/@@edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... """)
-  HTTP/1.1 200 OK
-  Content-Length: ...
-  Content-Type: text/html;charset=utf-8
-  <BLANKLINE>
+  ... """, handle_errors=False))
+  Traceback (most recent call last):
   ...
-     <li>The character set specified in the content type (UTF-8) does not match file content.</li>
-  ...
-
+  zope.exceptions.interfaces.UserError: The character set specified in the content type ($charset) does not match file content.
 
 Non-ASCII Filenames
 -------------------
 
 Filenames are not restricted to ASCII.
 
-  >>> print http("""
+  >>> print(http(b"""
   ... POST /+/zope.app.file.File%3D HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... Content-Type: multipart/form-data; boundary=---------------------------73793505419963331401738523176
@@ -631,7 +618,7 @@ Filenames are not restricted to ASCII.
   ...
   ...
   ... -----------------------------73793505419963331401738523176--
-  ... """)
+  ... """))
   HTTP/1.1 303 See Other
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
@@ -645,10 +632,9 @@ filename.
   >>> response = http("""
   ... GET /bj%C3%B6rn.txt.gz HTTP/1.1
   ... """)
-  >>> print response
+  >>> print(response)
   HTTP/1.1 200 OK
   Content-Length: 36
   Content-Type: application/octet-stream
   <BLANKLINE>
   ...
-

@@ -18,66 +18,91 @@
 ##############################################################################
 """Setup for zope.app.file package
 
-$Id$
 """
 import os
 from setuptools import setup, find_packages
 
 def read(*rnames):
-    return open(os.path.join(os.path.dirname(__file__), *rnames)).read()
+    with open(os.path.join(os.path.dirname(__file__), *rnames)) as f:
+        return f.read()
 
 setup(name='zope.app.file',
-      version='3.6.2dev',
+      version='4.0.0.dev0',
       author='Zope Corporation and Contributors',
       author_email='zope-dev@zope.org',
       description='File and Image -- Zope 3 Content Components',
       long_description=(
-          read('README.txt')
+          read('README.rst')
           + '\n\n.. contents::\n\n' +
-          read('src', 'zope', 'app', 'file', 'browser', 'file.txt')
+          read('src', 'zope', 'app', 'file', 'browser', 'file.rst')
           + '\n\n' +
-          read('src', 'zope', 'app', 'file', 'browser', 'url.txt')
+          read('src', 'zope', 'app', 'file', 'browser', 'url.rst')
           + '\n\n' +
-          read('CHANGES.txt')
+          read('CHANGES.rst')
           ),
-      keywords = "zope3 file image content",
-      classifiers = [
+      keywords="zope3 file image content",
+      classifiers=[
           'Development Status :: 5 - Production/Stable',
           'Environment :: Web Environment',
           'Intended Audience :: Developers',
           'License :: OSI Approved :: Zope Public License',
           'Programming Language :: Python',
+          'Programming Language :: Python :: 2',
+          'Programming Language :: Python :: 2.7',
+          'Programming Language :: Python :: 3',
+          'Programming Language :: Python :: 3.4',
+          'Programming Language :: Python :: 3.5',
+          'Programming Language :: Python :: 3.6',
+          'Programming Language :: Python :: Implementation :: CPython',
+          'Programming Language :: Python :: Implementation :: PyPy',
           'Natural Language :: English',
           'Operating System :: OS Independent',
           'Topic :: Internet :: WWW/HTTP',
-          'Framework :: Zope3'],
+          'Framework :: Zope3',
+      ],
       url='http://pypi.python.org/pypi/zope.app.file',
       license='ZPL 2.1',
       packages=find_packages('src'),
-      package_dir = {'': 'src'},
+      package_dir={'': 'src'},
       namespace_packages=['zope', 'zope.app'],
-      extras_require = dict(test=['zope.app.testing',
-                                  'zope.app.securitypolicy',
-                                  'zope.app.zcmlfiles',
-                                  'zope.publisher >= 3.12',
-                                  'zope.login',
-                                  ]),
-      install_requires=['setuptools',
-                        'transaction',
-                        'ZODB3',
-                        'zope.app.publication',
-                        'zope.contenttype>=3.5.0dev',
-                        'zope.datetime',
-                        'zope.dublincore>=3.7',
-                        'zope.event',
-                        'zope.exceptions',
-                        'zope.filerepresentation',
-                        'zope.i18nmessageid',
-                        'zope.interface',
-                        'zope.schema',
-                        'zope.site',
-                        'zope.size',
-                        ],
-      include_package_data = True,
-      zip_safe = False,
-      )
+      extras_require={
+          'test': [
+              'webtest',
+              'zope.app.appsetup >= 4.0.0',
+              'zope.app.basicskin >= 4.0.0',
+              'zope.app.exception >= 4.0.0',
+              'zope.app.folder >= 4.0.0',
+              'zope.app.http >= 4.0.1.dev0',
+              'zope.app.rotterdam >= 4.0.0',
+              'zope.app.securitypolicy',
+              'zope.app.wsgi',
+              'zope.dublincore',
+              'zope.login',
+              'zope.principalannotation',
+              'zope.publisher >= 3.12',
+              'zope.testing',
+              'zope.testrunner',
+          ]
+      },
+      install_requires=[
+          'setuptools',
+          'transaction',
+          'persistent',
+          'zope.app.content >= 4.0.0',
+          'zope.app.form >= 5.0.0',
+          'zope.app.publication',
+          'zope.contenttype >= 4.0.0',
+          'zope.datetime',
+          'zope.dublincore >= 4.0.0',
+          'zope.event',
+          'zope.exceptions',
+          'zope.filerepresentation',
+          'zope.i18nmessageid >= 4.1.0',
+          'zope.interface',
+          'zope.schema',
+          'zope.site',
+          'zope.size',
+      ],
+      include_package_data=True,
+      zip_safe=False,
+)

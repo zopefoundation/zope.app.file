@@ -13,18 +13,17 @@
 ##############################################################################
 """Basic File interfaces.
 
-$Id$
 """
 __docformat__ = 'restructuredtext'
 
-from zope.schema import BytesLine, Bytes
+from zope.schema import NativeStringLine, Bytes
 from zope.interface import Interface
 from zope.app.file.i18n import ZopeMessageFactory as _
 
 
 class IFile(Interface):
 
-    contentType = BytesLine(
+    contentType = NativeStringLine(
         title = _(u'Content Type'),
         description=_(u'The content type identifies the type of data.'),
         default='',
@@ -35,8 +34,8 @@ class IFile(Interface):
     data = Bytes(
         title=_(u'Data'),
         description=_(u'The actual content of the object.'),
-        default='',
-        missing_value='',
+        default=b'',
+        missing_value=b'',
         required=False,
         )
 

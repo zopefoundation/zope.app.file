@@ -12,20 +12,25 @@
 #
 ##############################################################################
 """File content component
-
-$Id$
 """
 __docformat__ = 'restructuredtext'
 
 from persistent import Persistent
 import transaction
-from zope.interface import implements
+from zope.interface import implementer
 import zope.app.publication.interfaces
 from zope.app.file import interfaces
 
 # set the size of the chunks
 MAXCHUNKSIZE = 1 << 16
 
+try:
+    text_type = unicode
+except NameError:
+    text_type = str
+
+@implementer(zope.app.publication.interfaces.IFileContent,
+             interfaces.IFile)
 class File(Persistent):
     """A persistent content component storing binary file data
 
@@ -34,26 +39,26 @@ class File(Persistent):
     >>> file = File()
     >>> file.contentType
     ''
-    >>> file.data
-    ''
+    >>> file.data == b''
+    True
 
-    >>> file = File('Foobar')
+    >>> file = File(b'Foobar')
     >>> file.contentType
     ''
-    >>> file.data
-    'Foobar'
+    >>> file.data == b'Foobar'
+    True
 
-    >>> file = File('Foobar', 'text/plain')
+    >>> file = File(b'Foobar', 'text/plain')
     >>> file.contentType
     'text/plain'
-    >>> file.data
-    'Foobar'
+    >>> file.data == b'Foobar'
+    True
 
-    >>> file = File(data='Foobar', contentType='text/plain')
+    >>> file = File(data=b'Foobar', contentType='text/plain')
     >>> file.contentType
     'text/plain'
-    >>> file.data
-    'Foobar'
+    >>> file.data == b'Foobar'
+    True
 
 
     Let's test the mutators:
@@ -63,9 +68,9 @@ class File(Persistent):
     >>> file.contentType
     'text/plain'
 
-    >>> file.data = 'Foobar'
-    >>> file.data
-    'Foobar'
+    >>> file.data = b'Foobar'
+    >>> file.data == b'Foobar'
+    True
 
     >>> file.data = None
     Traceback (most recent call last):
@@ -79,31 +84,31 @@ class File(Persistent):
 
     Insert as string:
 
-    >>> file.data = 'Foobar'*60000
+    >>> file.data = b'Foobar'*60000
     >>> file.getSize()
     360000
-    >>> file.data == 'Foobar'*60000
+    >>> file.data == b'Foobar'*60000
     True
 
     Insert data as FileChunk:
 
-    >>> fc = FileChunk('Foobar'*4000)
+    >>> fc = FileChunk(b'Foobar'*4000)
     >>> file.data = fc
     >>> file.getSize()
     24000
-    >>> file.data == 'Foobar'*4000
+    >>> file.data == b'Foobar'*4000
     True
 
     Insert data from file object:
 
-    >>> import cStringIO
-    >>> sio = cStringIO.StringIO()
-    >>> sio.write('Foobar'*100000)
-    >>> sio.seek(0)
+    >>> from io import BytesIO
+    >>> sio = BytesIO()
+    >>> _ = sio.write(b'Foobar'*100000)
+    >>> _ = sio.seek(0)
     >>> file.data = sio
-    >>> file.getSize()
-    600000
-    >>> file.data == 'Foobar'*100000
+    >>> file.getSize() == 600000
+    True
+    >>> file.data == b'Foobar'*100000
     True
 
 
@@ -116,25 +121,27 @@ class File(Persistent):
     True
     """
 
-    implements(zope.app.publication.interfaces.IFileContent, interfaces.IFile)
+    _data = None
+    _size = 0
 
-    def __init__(self, data='', contentType=''):
+    def __init__(self, data=b'', contentType=''):
+        if not isinstance(data, (bytes, text_type)) and not hasattr(data, 'seek'):
+            raise TypeError("Data must be bytes or string or file-like", data)
         self.data = data
         self.contentType = contentType
 
     def _getData(self):
         if isinstance(self._data, FileChunk):
-            return str(self._data)
-        else:
-            return self._data
+            return bytes(self._data)
+        return self._data
 
-    def _setData(self, data) :
+    def _setData(self, data):
 
         # Handle case when data is a string
-        if isinstance(data, unicode):
+        if isinstance(data, text_type):
             data = data.encode('UTF-8')
 
-        if isinstance(data, str):
+        if isinstance(data, bytes):
             self._data, self._size = FileChunk(data), len(data)
             return
 
@@ -225,14 +232,14 @@ class FileChunk(Persistent):
     def __init__(self, data):
         self._data = data
 
-    def __getslice__(self, i, j):
-        return self._data[i:j]
+    def __getitem__(self, i):
+        return self._data[i]
 
     def __len__(self):
-        data = str(self)
+        data = bytes(self)
         return len(data)
 
-    def __str__(self):
+    def __bytes__(self):
         next = self.next
         if next is None:
             return self._data
@@ -243,14 +250,20 @@ class FileChunk(Persistent):
             result.append(self._data)
             next = self.next
 
-        return ''.join(result)
+        return b''.join(result)
+
+    if str is bytes:
+        __str__ = __bytes__
+    else:
+        def __str__(self):
+            return self.__bytes__().decode("iso-8859-1", errors='ignore')
 
 
 class FileReadFile(object):
     '''Adapter for file-system style read access.
 
     >>> file = File()
-    >>> content = "This is some file\\ncontent."
+    >>> content = b"This is some file\\ncontent."
     >>> file.data = content
     >>> file.contentType = "text/plain"
     >>> FileReadFile(file).read() == content
@@ -272,7 +285,7 @@ class FileWriteFile(object):
     """Adapter for file-system style write access.
 
     >>> file = File()
-    >>> content = "This is some file\\ncontent."
+    >>> content = b"This is some file\\ncontent."
     >>> FileWriteFile(file).write(content)
     >>> file.data == content
     True

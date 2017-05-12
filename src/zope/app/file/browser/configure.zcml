@@ -4,8 +4,10 @@
     i18n_domain="zope"
     >
 
+  <include package="zope.app.form.browser" file="meta.zcml" />
+
   <!-- directives for File -->
-  
+
   <browser:form
       name="edit.html"
       for="zope.app.file.interfaces.IFile"
