@@ -583,10 +583,14 @@ exception. When that bug is fixed we should return to
   >>> print(http(r"""
   ... GET /hello.txt.gz/@@edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... """, handle_errors=False))
-  Traceback (most recent call last):
+  ... """, handle_errors=True))
+  HTTP/1.1 200 OK
+  Content-Length: ...
+  Content-Type: text/html;charset=utf-8
+  <BLANKLINE>
   ...
-  zope.exceptions.interfaces.UserError: The character set specified in the content type ($charset) does not match file content.
+     <li>The character set specified in the content type (UTF-8) does not match file content.</li>
+  ...
 
 Non-ASCII Filenames
 -------------------
