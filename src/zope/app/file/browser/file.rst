@@ -573,12 +573,7 @@ Likewise, the user is not allowed to specify a character set that is not support
   ...
 
 If you trick Zope and upload a file with a content type that does not
-match the file contents, you will not be able to access the edit view.
-(Because of `a bug in zope.app.exception
-<https://github.com/zopefoundation/zope.app.exception/issues/2>`_, we
-can't see the pretty HTML on Python 3 so we resort to looking at the
-exception. When that bug is fixed we should return to
-``handle_errors=True``.)
+match the file contents, you will not be able to access the edit view:
 
   >>> print(http(r"""
   ... GET /hello.txt.gz/@@edit.html HTTP/1.1
