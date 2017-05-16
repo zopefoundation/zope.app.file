@@ -17,8 +17,6 @@ notifications:
 install:
   - pip install -U pip setuptools
   - pip install -U coveralls coverage
-# XXX: Remove when https://github.com/zopefoundation/zope.app.http/pull/2 is released
-  - pip install git+https://github.com/zopefoundation/zope.app.http.git#egg=zope.app.http
   - pip install -U -e ".[test]"
 
 
