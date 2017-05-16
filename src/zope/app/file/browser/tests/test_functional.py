@@ -13,26 +13,95 @@
 ##############################################################################
 """Functional tests for File and Image.
 
-$Id$
 """
-
+import doctest
 import re
 import unittest
 from xml.sax.saxutils import escape
-from StringIO import StringIO
+from io import BytesIO
 from zope.testing import renormalizing
+from zope.component.interfaces import ComponentLookupError
 
-from zope.app.testing import functional
-from zope.app.testing.functional import BrowserTestCase
 from zope.app.file.file import File
 from zope.app.file.image import Image
 from zope.app.file.tests.test_image import zptlogo
 from zope.app.file.testing import AppFileLayer
+from zope.app.file.tests import http
+
+from webtest import TestApp
+
+class StringIO(BytesIO):
+
+    def __init__(self, contents):
+        if not isinstance(contents, bytes):
+            contents = contents.encode("ascii")
+        super(StringIO, self).__init__(contents)
+
+class BrowserTestCase(unittest.TestCase):
+
+    layer = AppFileLayer
+
+    def setUp(self):
+        super(BrowserTestCase, self).setUp()
+        self._testapp = TestApp(self.layer.make_wsgi_app())
+
+    def getRootFolder(self):
+        return self.layer.getRootFolder()
+
+    def commit(self):
+        pass
+
+    def checkForBrokenLinks(self, orig_response, path, basic=None):
+        response = self.publish(path, basic=basic)
+        try:
+            links = response.html.find_all('a')
+        except (AttributeError, TypeError):
+            # Not html
+            return
+
+        for link in links:
+            href = link.attrs['href']
+            if href.endswith('@@SelectedManagementView.html'):
+                # We don't install this at test time
+                continue
+
+            if not href.startswith('/'):
+                href = path.rsplit('/', 1)[0] + '/' + href
+            try:
+                self.publish(href, basic=basic)
+            except ComponentLookupError:
+                # PrincipalSource, not installed at testing
+                pass
+
+
+    def publish(self, path, basic=None, form=None, headers=None):
+        assert basic
+        self._testapp.authorization = ('Basic', tuple(basic.split(':')))
+        env = {'wsgi.handleErrors': False}
+        if form:
+            upload_files = []
+            for k, v in list(form.items()):
+                if isinstance(v, StringIO):
+                    upload_files.append((k,
+                                         getattr(v, 'filename', 'a file'),
+                                         v.getvalue()))
+                    del form[k]
+            response = self._testapp.post(path, params=form,
+                                          upload_files=upload_files,
+                                          extra_environ=env, headers=headers)
+        else:
+            response = self._testapp.get(path, extra_environ=env, headers=headers)
+
+        response.getBody = lambda: response.unicode_normal_body
+        response.getStatus = lambda: response.status_int
+        response.getHeader = lambda n: response.headers[n]
+        return response
+
 
 
 class FileTest(BrowserTestCase):
 
-    content = u'File <Data>'
+    content = b'File <Data>'
 
     def addFile(self):
         file = File(self.content)
@@ -46,12 +115,12 @@ class FileTest(BrowserTestCase):
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 200)
         body = response.getBody()
-        self.assert_('Add a File' in body)
-        self.assert_('Content Type' in body)
-        self.assert_('Data' in body)
-        self.assert_('Object Name' in body)
-        self.assert_('"Add"' in body)
-        self.checkForBrokenLinks(body, '/+/zope.app.file.File=',
+        self.assertTrue('Add a File' in body)
+        self.assertTrue('Content Type' in body)
+        self.assertTrue('Data' in body)
+        self.assertTrue('Object Name' in body)
+        self.assertTrue('"Add"' in body)
+        self.checkForBrokenLinks(response, '/+/zope.app.file.File=',
                                  'mgr:mgrpw')
 
     def testAdd(self):
@@ -67,13 +136,13 @@ class FileTest(BrowserTestCase):
         self.assertEqual(response.getHeader('Location'),
                          'http://localhost/@@contents.html')
         root = self.getRootFolder()
-        self.assert_('file' in root)
+        self.assertTrue('file' in root)
         file = root['file']
-        self.assertEqual(file.data, 'A file')
+        self.assertEqual(file.data, b'A file')
 
     def testAddWithoutName(self):
         data = StringIO('File Contents')
-        data.filename="test.txt"
+        data.filename = "test.txt"
         response = self.publish(
             '/+/zope.app.file.File=',
             form={'type_name': u'zope.app.file.File',
@@ -85,9 +154,9 @@ class FileTest(BrowserTestCase):
         self.assertEqual(response.getHeader('Location'),
                          'http://localhost/@@contents.html')
         root = self.getRootFolder()
-        self.assert_('test.txt' in root)
+        self.assertIn('test.txt', root, list(root))
         file = root['test.txt']
-        self.assertEqual(file.data, 'File Contents')
+        self.assertEqual(file.data, b'File Contents')
 
     def testEditForm(self):
         self.addFile()
@@ -96,11 +165,11 @@ class FileTest(BrowserTestCase):
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 200)
         body = response.getBody()
-        self.assert_('Change a file' in body)
-        self.assert_('Content Type' in body)
-        self.assert_('Data' in body)
-        self.assert_(escape(self.content) in body)
-        self.checkForBrokenLinks(body, '/file/@@edit.html', 'mgr:mgrpw')
+        self.assertTrue('Change a file' in body)
+        self.assertTrue('Content Type' in body)
+        self.assertTrue('Data' in body)
+        self.assertIn(escape(self.content.decode('ascii')), body)
+        self.checkForBrokenLinks(response, '/file/@@edit.html', 'mgr:mgrpw')
 
     def testEdit(self):
         self.addFile()
@@ -113,13 +182,13 @@ class FileTest(BrowserTestCase):
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 200)
         body = response.getBody()
-        self.assert_('Change a file' in body)
-        self.assert_('Content Type' in body)
-        self.assert_('Data' in body)
-        self.assert_(escape(u'<h1>A File</h1>') in body)
+        self.assertTrue('Change a file' in body)
+        self.assertTrue('Content Type' in body)
+        self.assertTrue('Data' in body)
+        self.assertTrue(escape(u'<h1>A File</h1>') in body)
         root = self.getRootFolder()
         file = root['file']
-        self.assertEqual(file.data, '<h1>A File</h1>')
+        self.assertEqual(file.data, b'<h1>A File</h1>')
         self.assertEqual(file.contentType, 'text/plain')
 
     def testUploadForm(self):
@@ -129,11 +198,11 @@ class FileTest(BrowserTestCase):
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 200)
         body = response.getBody()
-        self.assert_('Upload a file' in body)
-        self.assert_('Content Type' in body)
-        self.assert_('Data' in body)
-        self.failIf(escape(self.content) in body)
-        self.checkForBrokenLinks(body, '/file/@@upload.html', 'mgr:mgrpw')
+        self.assertTrue('Upload a file' in body)
+        self.assertTrue('Content Type' in body)
+        self.assertTrue('Data' in body)
+        self.assertNotIn(escape(self.content.decode('ascii')), body)
+        self.checkForBrokenLinks(response, '/file/@@upload.html', 'mgr:mgrpw')
 
     def testUpload(self):
         self.addFile()
@@ -146,13 +215,13 @@ class FileTest(BrowserTestCase):
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 200)
         body = response.getBody()
-        self.assert_('Upload a file' in body)
-        self.assert_('Content Type' in body)
-        self.assert_('Data' in body)
-        self.failIf(escape(u'<h1>A File</h1>') in body)
+        self.assertTrue('Upload a file' in body)
+        self.assertTrue('Content Type' in body)
+        self.assertTrue('Data' in body)
+        self.assertNotIn(escape(u'<h1>A File</h1>'), body)
         root = self.getRootFolder()
         file = root['file']
-        self.assertEqual(file.data, '<h1>A file</h1>')
+        self.assertEqual(file.data, b'<h1>A file</h1>')
         self.assertEqual(file.contentType, 'text/plain')
 
     def testIndex(self):
@@ -161,9 +230,9 @@ class FileTest(BrowserTestCase):
             '/file/@@index.html',
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 200)
-        body = response.getBody()
+        body = response.body
         self.assertEqual(body, self.content)
-        self.checkForBrokenLinks(body, '/file/@@index.html', 'mgr:mgrpw')
+        self.checkForBrokenLinks(response, '/file/@@index.html', 'mgr:mgrpw')
 
     def testPreview(self):
         self.addFile()
@@ -172,8 +241,8 @@ class FileTest(BrowserTestCase):
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 200)
         body = response.getBody()
-        self.assert_('<iframe src="."' in body)
-        self.checkForBrokenLinks(body, '/file/@@preview.html', 'mgr:mgrpw')
+        self.assertTrue('<iframe src="."' in body)
+        self.checkForBrokenLinks(response, '/file/@@preview.html', 'mgr:mgrpw')
 
 
 class ImageTest(BrowserTestCase):
@@ -192,12 +261,12 @@ class ImageTest(BrowserTestCase):
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 200)
         body = response.getBody()
-        self.assert_('Add an Image' in body)
-        self.assert_('Content Type' in body)
-        self.assert_('Data' in body)
-        self.assert_('Object Name' in body)
-        self.assert_('"Add"' in body)
-        self.checkForBrokenLinks(body, '/+/zope.app.file.Image=',
+        self.assertTrue('Add an Image' in body)
+        self.assertTrue('Content Type' in body)
+        self.assertTrue('Data' in body)
+        self.assertTrue('Object Name' in body)
+        self.assertTrue('"Add"' in body)
+        self.checkForBrokenLinks(response, '/+/zope.app.file.Image=',
                                  'mgr:mgrpw')
 
     def testAdd(self):
@@ -213,7 +282,7 @@ class ImageTest(BrowserTestCase):
         self.assertEqual(response.getHeader('Location'),
                          'http://localhost/@@contents.html')
         root = self.getRootFolder()
-        self.assert_('image' in root)
+        self.assertTrue('image' in root)
         image = root['image']
         self.assertEqual(image.data, self.content)
 
@@ -231,7 +300,7 @@ class ImageTest(BrowserTestCase):
         self.assertEqual(response.getHeader('Location'),
                          'http://localhost/@@contents.html')
         root = self.getRootFolder()
-        self.assert_('test.gif' in root)
+        self.assertIn('test.gif', root, list(root))
         image = root['test.gif']
         self.assertEqual(image.data, self.content)
 
@@ -242,11 +311,11 @@ class ImageTest(BrowserTestCase):
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 200)
         body = response.getBody()
-        self.assert_('Upload an image' in body)
-        self.assert_('Content Type' in body)
-        self.assert_('Data' in body)
-        self.assert_('1 KB 16x16' in body)
-        self.checkForBrokenLinks(body, '/image/@@upload.html', 'mgr:mgrpw')
+        self.assertTrue('Upload an image' in body)
+        self.assertTrue('Content Type' in body)
+        self.assertTrue('Data' in body)
+        self.assertTrue('1 KB 16x16' in body)
+        self.checkForBrokenLinks(response, '/image/@@upload.html', 'mgr:mgrpw')
 
     def testUpload(self):
         self.addImage()
@@ -258,13 +327,13 @@ class ImageTest(BrowserTestCase):
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 200)
         body = response.getBody()
-        self.assert_('Upload an image' in body)
-        self.assert_('Content Type' in body)
-        self.assert_('Data' in body)
-        self.assert_('0 KB ?x?' in body)
+        self.assertTrue('Upload an image' in body)
+        self.assertTrue('Content Type' in body)
+        self.assertTrue('Data' in body)
+        self.assertTrue('0 KB ?x?' in body)
         root = self.getRootFolder()
         image = root['image']
-        self.assertEqual(image.data, '')
+        self.assertEqual(image.data, b'')
         self.assertEqual(image.contentType, 'image/gif')
 
     def testUpload_only_change_content_type(self):
@@ -276,10 +345,10 @@ class ImageTest(BrowserTestCase):
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 200)
         body = response.getBody()
-        self.assert_('Upload an image' in body)
-        self.assert_('Content Type' in body)
-        self.assert_('Data' in body)
-        self.assert_('1 KB 16x16' in body)
+        self.assertTrue('Upload an image' in body)
+        self.assertTrue('Content Type' in body)
+        self.assertTrue('Data' in body)
+        self.assertTrue('1 KB 16x16' in body)
         root = self.getRootFolder()
         image = root['image']
         self.assertEqual(image.data, self.content)
@@ -291,9 +360,9 @@ class ImageTest(BrowserTestCase):
             '/image/@@index.html',
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 200)
-        body = response.getBody()
+        body = response.body
         self.assertEqual(body, self.content)
-        self.checkForBrokenLinks(body, '/image/@@index.html', 'mgr:mgrpw')
+        self.checkForBrokenLinks(response, '/image/@@index.html', 'mgr:mgrpw')
 
     def testPreview(self):
         self.addImage()
@@ -302,29 +371,37 @@ class ImageTest(BrowserTestCase):
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 200)
         body = response.getBody()
-        self.assert_('<iframe src="."' in body)
-        self.checkForBrokenLinks(body, '/image/@@preview.html', 'mgr:mgrpw')
+        self.assertTrue('<iframe src="."' in body)
+        self.checkForBrokenLinks(response, '/image/@@preview.html', 'mgr:mgrpw')
 
 
 checker = renormalizing.RENormalizing([
-    (re.compile(r"HTTP/1\.1 200 .*"), "HTTP/1.1 200 OK"),
-    (re.compile(r"HTTP/1\.1 303 .*"), "HTTP/1.1 303 See Other"),
-    ])
+    (re.compile(r"HTTP/1\.0 200 .*"), "HTTP/1.1 200 OK"),
+    (re.compile(r"HTTP/1\.0 303 .*"), "HTTP/1.1 303 See Other"),
+    (re.compile(r"u'(.*)'"), r"'\1'"),
+])
 
 
 def test_suite():
-    FileTest.layer = AppFileLayer
-    ImageTest.layer = AppFileLayer
-    url = functional.FunctionalDocFileSuite('../url.txt', checker=checker)
-    url.layer = AppFileLayer
-    file = functional.FunctionalDocFileSuite('../file.txt', checker=checker)
-    file.layer = AppFileLayer
+    def _make_doctest(fname):
+        test = doctest.DocFileSuite(
+            fname,
+            checker=checker,
+            globs={'http': http},
+        optionflags=(doctest.ELLIPSIS
+                     | doctest.NORMALIZE_WHITESPACE
+                     | doctest.IGNORE_EXCEPTION_DETAIL
+                     | renormalizing.IGNORE_EXCEPTION_MODULE_IN_PYTHON2))
+        test.layer = AppFileLayer
+        return test
+
+    url = _make_doctest('../url.rst')
+    file = _make_doctest('../file.rst')
     return unittest.TestSuite((
-        unittest.makeSuite(FileTest),
-        unittest.makeSuite(ImageTest),
+        unittest.defaultTestLoader.loadTestsFromName(__name__),
         url,
         file,
-        ))
+    ))
 
 
 if __name__ == '__main__':

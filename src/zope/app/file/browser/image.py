@@ -13,7 +13,6 @@
 ##############################################################################
 """Define view component for naive file editing.
 
-$Id$
 """
 __docformat__ = 'restructuredtext'
 
@@ -58,10 +57,9 @@ class ImageData(FileView):
         if ydelta and height:
             height = str(int(round(int(height) * ydelta)))
 
+        result = '<img '
         if self.request is not None:
             result = '<img src="%s"' % absoluteURL(self.context, self.request)
-        else:
-            result = '<img '
 
         if alt is None:
             alt = getattr(self, 'title', '')
@@ -73,14 +71,13 @@ class ImageData(FileView):
         if width is not None:
             result = '%s width="%s"' % (result, width)
 
-        if not 'border' in [a.lower() for a in args.keys()]:
+        if not 'border' in [a.lower() for a in args]:
             result = '%s border="0"' % result
 
         if css_class is not None:
             result = '%s class="%s"' % (result, css_class)
 
-        for key in args.keys():
-            value = args.get(key)
+        for key, value in args.items():
             result = '%s %s="%s"' % (result, key, value)
 
         return '%s />' % result

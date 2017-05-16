@@ -13,9 +13,8 @@
 ##############################################################################
 """File and Image content components
 
-$Id$
 """
 __docformat__ = 'restructuredtext'
 
-from file import File
-from image import Image
+from .file import File
+from .image import Image

@@ -13,14 +13,13 @@
 ##############################################################################
 """zope.app.file common test related classes/functions/objects.
 
-$Id$
 """
 
 __docformat__ = "reStructuredText"
 
-import os
-from zope.app.testing.functional import ZCMLLayer
+from zope.app.wsgi.testlayer import BrowserLayer
 
-AppFileLayer = ZCMLLayer(
-    os.path.join(os.path.split(__file__)[0], 'ftesting.zcml'),
-    __name__, 'AppFileLayer', allow_teardown=True)
+import zope.app.file
+
+AppFileLayer = BrowserLayer(zope.app.file,
+                            allowTearDown=True)

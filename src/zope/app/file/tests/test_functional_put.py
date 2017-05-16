@@ -13,17 +13,16 @@
 ##############################################################################
 """Test HTTP PUT verb
 
-$Id$
 """
 
-from unittest import TestSuite, TestCase, makeSuite
+import unittest
 
-from zope.app.wsgi.testlayer import http, BrowserLayer
-import zope.app.http
+from zope.app.file.tests import http
+from zope.app.file.testing import AppFileLayer
 
-class TestPUT(TestCase):
+class TestPUT(unittest.TestCase):
 
-    layer = BrowserLayer(zope.app.file)
+    layer = AppFileLayer
 
     def test_put(self):
         # PUT something for the first time
@@ -40,7 +39,7 @@ This is just a test.""")
 
         response = http(r"""GET /testfile.txt HTTP/1.1
 Authorization: Basic globalmgr:globalmgrpw""")
-        self.assertEquals(response.getBody(), "This is just a test.")
+        self.assertEquals(response.getBody(), b"This is just a test.")
 
         # now modify it
         response = http(r"""PUT /testfile.txt HTTP/1.1
@@ -50,14 +49,12 @@ Content-Type: text/plain
 
 And now it is modified.""")
         self.assertEquals(response.getStatus(), 200)
-        self.assertEquals(response.getBody(), "")
+        self.assertEquals(response.getBody(), b"")
 
         response = http(r"""GET /testfile.txt HTTP/1.1
 Authorization: Basic globalmgr:globalmgrpw""")
-        self.assertEquals(response.getBody(), "And now it is modified.")
+        self.assertEquals(response.getBody(), b"And now it is modified.")
 
 
 def test_suite():
-    return TestSuite((
-        makeSuite(TestPUT),
-        ))
+    return unittest.defaultTestLoader.loadTestsFromName(__name__)

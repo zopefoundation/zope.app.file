@@ -13,8 +13,9 @@
 ##############################################################################
 """File views.
 
-$Id$
 """
+from __future__ import print_function
+
 import zope.event
 from zope import lifecycleevent
 from zope.contenttype import guess_content_type
@@ -28,12 +29,15 @@ from zope.app.file.i18n import ZopeMessageFactory as _
 from zope.dublincore.interfaces import IDCTimes
 import zope.datetime
 
-import time
+
 from datetime import datetime
 
 __docformat__ = 'restructuredtext'
 
 class FileView(object):
+
+    request = None
+    context = None
 
     def show(self):
 
@@ -46,8 +50,8 @@ class FileView(object):
         >>> class FileTestView(FileView, BrowserView): pass
         >>> import pytz
         >>> class MyFile(object):
-        ...     contentType='text/plain'
-        ...     data="data of file"
+        ...     contentType = 'text/plain'
+        ...     data = b"data of file"
         ...     modified = datetime(2006,1,1,tzinfo=pytz.utc)
         ...     def getSize(self):
         ...         return len(self.data)
@@ -55,8 +59,8 @@ class FileView(object):
         >>> aFile = MyFile()
         >>> request = TestRequest()
         >>> view = FileTestView(aFile,request)
-        >>> view.show()
-        'data of file'
+        >>> view.show() == MyFile.data
+        True
         >>> request.response.getHeader('Content-Type')
         'text/plain'
         >>> request.response.getHeader('Content-Length')
@@ -75,8 +79,8 @@ class FileView(object):
         >>> directlyProvides(aFile,IZopeDublinCore)
         >>> request = TestRequest()
         >>> view = FileTestView(aFile,request)
-        >>> view.show()
-        'data of file'
+        >>> view.show() == MyFile.data
+        True
         >>> request.response.getHeader('Last-Modified')
         'Sun, 01 Jan 2006 00:00:00 GMT'
 
@@ -88,10 +92,17 @@ class FileView(object):
         >>> request = TestRequest(IF_MODIFIED_SINCE=modHeader)
 
         >>> view = FileTestView(aFile,request)
-        >>> view.show()
-        ''
+        >>> view.show() == b''
+        True
         >>> request.response.getStatus()
         304
+
+        An invalid value for that header is ignored.
+        >>> request = TestRequest(IF_MODIFIED_SINCE="Not Valid")
+
+        >>> view = FileTestView(aFile,request)
+        >>> view.show() == MyFile.data
+        True
 
         """
 
@@ -103,20 +114,22 @@ class FileView(object):
         try:
             modified = IDCTimes(self.context).modified
         except TypeError:
-            modified=None
+            modified = None
         if modified is None or not isinstance(modified,datetime):
             return self.context.data
 
-        header= self.request.getHeader('If-Modified-Since', None)
+        header = self.request.getHeader('If-Modified-Since', None)
         lmt = zope.datetime.time(modified.isoformat())
         if header is not None:
             header = header.split(';')[0]
-            try:    mod_since=long(zope.datetime.time(header))
-            except: mod_since=None
+            try:
+                mod_since = int(zope.datetime.time(header))
+            except zope.datetime.SyntaxError:
+                mod_since = None
             if mod_since is not None:
                 if lmt <= mod_since:
                     self.request.response.setStatus(304)
-                    return ''
+                    return b''
         self.request.response.setHeader('Last-Modified',
                                         zope.datetime.rfc1123_date(lmt))
 
@@ -156,8 +169,8 @@ class FileAdd(FileUpdateView):
     ...         return 'next url'
 
     >>> from zope.publisher.browser import TestRequest
-    >>> import StringIO
-    >>> sio = StringIO.StringIO("some data")
+    >>> from io import BytesIO
+    >>> sio = BytesIO(b"some data")
     >>> sio.filename = 'abc.txt'
 
     Let's make sure we can use the uploaded file name if one isn't
@@ -173,8 +186,8 @@ class FileAdd(FileUpdateView):
     ''
     >>> adding.content.contentType
     'text/foobar'
-    >>> adding.content.data
-    'some data'
+    >>> adding.content.data == b'some data'
+    True
     >>> request.form['add_input_name']
     'abc.txt'
 
@@ -210,8 +223,8 @@ class FileUpload(FileUpdateView):
 
 
     >>> from zope.publisher.browser import TestRequest
-    >>> import StringIO
-    >>> sio = StringIO.StringIO("some data")
+    >>> from io import BytesIO
+    >>> sio = BytesIO(b"some data")
     >>> sio.filename = 'abc.txt'
 
     Before we instanciate the request, we need to make sure that the
@@ -219,17 +232,16 @@ class FileUpload(FileUpdateView):
     locale exists.  This is necessary because the ``update_object``
     method uses the locale formatter for the status message:
 
-    >>> from zope.app.testing import ztapi
+    >>> from zope import component as ztapi
     >>> from zope.publisher.browser import BrowserLanguages
     >>> from zope.publisher.interfaces.http import IHTTPRequest
     >>> from zope.i18n.interfaces import IUserPreferredLanguages
-    >>> ztapi.provideAdapter(IHTTPRequest, IUserPreferredLanguages,
-    ...                      BrowserLanguages)
+    >>> ztapi.provideAdapter(BrowserLanguages, (IHTTPRequest,), IUserPreferredLanguages)
 
     We install an event logger so we can see the events generated:
 
     >>> def eventLog(event):
-    ...     print 'ModifiedEvent:', event.descriptions[0].attributes
+    ...     print('ModifiedEvent:', event.descriptions[0].attributes)
     >>> zope.event.subscribers.append(eventLog)
 
     Let's make sure we can use the uploaded file name if one isn't
@@ -247,8 +259,8 @@ class FileUpload(FileUpdateView):
     u'Updated on ${date_time}'
     >>> file.contentType
     'text/foobar'
-    >>> file.data
-    'some data'
+    >>> file.data == b'some data'
+    True
 
     Now let's guess the content type, but also use a provided file
     name for adding the new content object:
@@ -293,7 +305,7 @@ class FileUpload(FileUpdateView):
         # Update *only* if a new value is specified
         if data:
             self.context.data = data
-            descriptor.attributes += "data",
+            descriptor.attributes += ("data",)
 
         event = lifecycleevent.ObjectModifiedEvent(self.context, descriptor)
         zope.event.notify(event)
@@ -337,13 +349,15 @@ class FileEdit(object):
         >>> from zope.publisher.browser import BrowserView, TestRequest
         >>> class FileEditView(FileEdit, BrowserView): pass
         >>> view = FileEditView(File(), TestRequest())
-        >>> view.getData()
-        {'data': u'', 'contentType': ''}
+        >>> view.getData()['data']
+        u''
+        >>> view.getData()['contentType']
+        ''
 
         We install an event logger so we can see the events generated.
 
         >>> def eventLog(event):
-        ...    print event.__class__.__name__, event.descriptions[0].attributes
+        ...    print(event.__class__.__name__, event.descriptions[0].attributes)
         >>> zope.event.subscribers.append(eventLog)
 
         >>> view.setData({'contentType': 'text/plain; charset=ISO-8859-13',
@@ -353,8 +367,8 @@ class FileEdit(object):
 
         >>> view.context.contentType
         'text/plain; charset=ISO-8859-13'
-        >>> view.context.data
-        'text \xe0'
+        >>> view.context.data == b'text \xe0'
+        True
 
         >>> view.getData()['data']
         u'text \u0105'
@@ -370,7 +384,7 @@ class FileEdit(object):
         ...               'data': u'text \u0105'})
         Traceback (most recent call last):
           ...
-        CharsetTooWeak: ISO-8859-1
+        zope.app.file.browser.file.CharsetTooWeak: ISO-8859-1
 
     You will get a different error if you try to specify an invalid charset
 
@@ -378,7 +392,7 @@ class FileEdit(object):
         ...               'data': u'text \u0105'})
         Traceback (most recent call last):
           ...
-        UnknownCharset: UNKNOWN
+        zope.app.file.browser.file.UnknownCharset: UNKNOWN
 
     The update method catches those errors and replaces them with error
     messages
@@ -409,21 +423,22 @@ class FileEdit(object):
     view:
 
         >>> view.context.contentType = 'text/plain; charset=UNKNOWN'
-        >>> view.context.data = '\xff'
+        >>> view.context.data = b'\xff'
         >>> view.getData()
         Traceback (most recent call last):
           ...
-        UserError: The character set specified in the content type ($charset) is not supported.
+        zope.exceptions.interfaces.UserError: The character set specified in the content type ($charset) is not supported.
 
         >>> view.context.contentType = 'text/plain; charset=UTF-8'
-        >>> view.context.data = '\xff'
+        >>> view.context.data = b'\xff'
         >>> view.getData()
         Traceback (most recent call last):
           ...
-        UserError: The character set specified in the content type ($charset) does not match file content.
+        zope.exceptions.interfaces.UserError: The character set specified in the content type ($charset) does not match file content.
 
     """
-
+    context = None
+    request = None
     error = None
 
     def getData(self):
@@ -450,12 +465,12 @@ class FileEdit(object):
             raise UnknownCharset(charset)
         except UnicodeEncodeError:
             raise CharsetTooWeak(charset)
-        
+
         modified = []
         if encodeddata != self.context.data:
             self.context.data = encodeddata
             modified.append('data')
-        
+
         if self.context.contentType != data['contentType']:
             self.context.contentType = data['contentType']
             modified.append('contentType')
@@ -473,12 +488,12 @@ class FileEdit(object):
     def update(self):
         try:
             return super(FileEdit, self).update()
-        except CharsetTooWeak, charset:
+        except CharsetTooWeak as charset:
             self.update_status = _("The character set you specified ($charset)"
                                    " cannot encode all characters in text.",
                                    mapping={'charset': charset})
             return self.update_status
-        except UnknownCharset, charset:
+        except UnknownCharset as charset:
             self.update_status = _("The character set you specified ($charset)"
                                    " is not supported.",
                                    mapping={'charset': charset})
@@ -497,7 +512,7 @@ def extractCharset(content_type):
 
     """
     if content_type and content_type.strip():
-        major, minor, params = zope.contenttype.parse.parse(content_type)
+        _major, _minor, params = zope.contenttype.parse.parse(content_type)
         return params.get("charset", "UTF-8")
-    else:
-        return "UTF-8"
+
+    return "UTF-8"
