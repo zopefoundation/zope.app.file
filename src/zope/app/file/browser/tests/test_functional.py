@@ -20,6 +20,7 @@ import unittest
 from xml.sax.saxutils import escape
 from io import BytesIO
 from zope.testing import renormalizing
+from zope.component.interfaces import ComponentLookupError
 
 from zope.app.file.file import File
 from zope.app.file.image import Image
@@ -50,9 +51,28 @@ class BrowserTestCase(unittest.TestCase):
     def commit(self):
         pass
 
-    def checkForBrokenLinks(self, response, _path, basic=None):
-        # XXX: TODO: Implement me
-        pass
+    def checkForBrokenLinks(self, orig_response, path, basic=None):
+        response = self.publish(path, basic=basic)
+        try:
+            links = response.html.find_all('a')
+        except (AttributeError, TypeError):
+            # Not html
+            return
+
+        for link in links:
+            href = link.attrs['href']
+            if href.endswith('@@SelectedManagementView.html'):
+                # We don't install this at test time
+                continue
+
+            if not href.startswith('/'):
+                href = path.rsplit('/', 1)[0] + '/' + href
+            try:
+                self.publish(href, basic=basic)
+            except ComponentLookupError:
+                # PrincipalSource, not installed at testing
+                pass
+
 
     def publish(self, path, basic=None, form=None, headers=None):
         assert basic
