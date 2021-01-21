@@ -22,7 +22,6 @@ from io import BytesIO
 from zope.app.file import file as zfile
 
 
-
 class TestFile(unittest.TestCase):
 
     def test_medium_size_chunk(self):
@@ -45,6 +44,7 @@ class TestFile(unittest.TestCase):
 
             class Jar(object):
                 added = ()
+
                 def add(self, o):
                     self.added += (o,)
 
@@ -63,6 +63,7 @@ class TestFile(unittest.TestCase):
         finally:
             zfile.MAXCHUNKSIZE = old_size
 
+
 class TestFileChunk(unittest.TestCase):
 
     def test_getitem(self):
@@ -73,6 +74,7 @@ class TestFileChunk(unittest.TestCase):
         chunk = zfile.FileChunk(b'abc')
         self.assertEqual(bytes(chunk), b'abc')
         self.assertEqual('abc', str(chunk))
+
 
 def test_suite():
     return unittest.TestSuite((

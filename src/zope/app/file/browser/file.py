@@ -34,13 +34,13 @@ from datetime import datetime
 
 __docformat__ = 'restructuredtext'
 
+
 class FileView(object):
 
     request = None
     context = None
 
     def show(self):
-
         """Sets various headers if the request is present and returns the
         data of the file. If the "If-Modified-Since" header is set and
         the context is adaptable to IDCTimes, data is only returned if
@@ -88,7 +88,8 @@ class FileView(object):
         status is returned and the value is empty.
 
         >>> modified = datetime(2007,12,31,tzinfo=pytz.utc)
-        >>> modHeader = zope.datetime.rfc1123_date(zope.datetime.time(modified.isoformat()))
+        >>> modHeader = zope.datetime.rfc1123_date(
+        ...     zope.datetime.time(modified.isoformat()))
         >>> request = TestRequest(IF_MODIFIED_SINCE=modHeader)
 
         >>> view = FileTestView(aFile,request)
@@ -115,7 +116,7 @@ class FileView(object):
             modified = IDCTimes(self.context).modified
         except TypeError:
             modified = None
-        if modified is None or not isinstance(modified,datetime):
+        if modified is None or not isinstance(modified, datetime):
             return self.context.data
 
         header = self.request.getHeader('If-Modified-Since', None)
@@ -135,8 +136,10 @@ class FileView(object):
 
         return self.context.data
 
+
 def cleanupFileName(filename):
     return filename.split('\\')[-1].split('/')[-1]
+
 
 class FileUpdateView(object):
 
@@ -236,7 +239,8 @@ class FileUpload(FileUpdateView):
     >>> from zope.publisher.browser import BrowserLanguages
     >>> from zope.publisher.interfaces.http import IHTTPRequest
     >>> from zope.i18n.interfaces import IUserPreferredLanguages
-    >>> ztapi.provideAdapter(BrowserLanguages, (IHTTPRequest,), IUserPreferredLanguages)
+    >>> ztapi.provideAdapter(
+    ...     BrowserLanguages, (IHTTPRequest,), IUserPreferredLanguages)
 
     We install an event logger so we can see the events generated:
 
@@ -328,11 +332,12 @@ class IFileEditForm(IFile):
         default=u'',
         missing_value=u'',
         required=False,
-        )
+    )
 
 
 class UnknownCharset(Exception):
     """Unknown character set."""
+
 
 class CharsetTooWeak(Exception):
     """Character set cannot encode all characters in text."""
@@ -357,7 +362,8 @@ class FileEdit(object):
         We install an event logger so we can see the events generated.
 
         >>> def eventLog(event):
-        ...    print(event.__class__.__name__, event.descriptions[0].attributes)
+        ...    print(event.__class__.__name__,
+        ...          event.descriptions[0].attributes)
         >>> zope.event.subscribers.append(eventLog)
 
         >>> view.setData({'contentType': 'text/plain; charset=ISO-8859-13',
@@ -436,7 +442,7 @@ class FileEdit(object):
           ...
         zope.exceptions.interfaces.UserError: The character set specified in the content type ($charset) does not match file content.
 
-    """
+    """  # noqa: E501 line too long
     context = None
     request = None
     error = None

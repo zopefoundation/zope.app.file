@@ -20,7 +20,7 @@ import unittest
 from xml.sax.saxutils import escape
 from io import BytesIO
 from zope.testing import renormalizing
-from zope.component.interfaces import ComponentLookupError
+from zope.interface.interfaces import ComponentLookupError
 
 from zope.app.file.file import File
 from zope.app.file.image import Image
@@ -30,12 +30,14 @@ from zope.app.file.tests import http
 
 from webtest import TestApp
 
+
 class StringIO(BytesIO):
 
     def __init__(self, contents):
         if not isinstance(contents, bytes):
             contents = contents.encode("ascii")
         super(StringIO, self).__init__(contents)
+
 
 class BrowserTestCase(unittest.TestCase):
 
@@ -73,7 +75,6 @@ class BrowserTestCase(unittest.TestCase):
                 # PrincipalSource, not installed at testing
                 pass
 
-
     def publish(self, path, basic=None, form=None, headers=None):
         assert basic
         self._testapp.authorization = ('Basic', tuple(basic.split(':')))
@@ -90,13 +91,13 @@ class BrowserTestCase(unittest.TestCase):
                                           upload_files=upload_files,
                                           extra_environ=env, headers=headers)
         else:
-            response = self._testapp.get(path, extra_environ=env, headers=headers)
+            response = self._testapp.get(
+                path, extra_environ=env, headers=headers)
 
         response.getBody = lambda: response.unicode_normal_body
         response.getStatus = lambda: response.status_int
         response.getHeader = lambda n: response.headers[n]
         return response
-
 
 
 class FileTest(BrowserTestCase):
@@ -288,7 +289,7 @@ class ImageTest(BrowserTestCase):
 
     def testAddWithoutName(self):
         data = StringIO(self.content)
-        data.filename="test.gif"
+        data.filename = "test.gif"
         response = self.publish(
             '/+/zope.app.file.Image=',
             form={'type_name': u'zope.app.image.Image',
@@ -372,7 +373,8 @@ class ImageTest(BrowserTestCase):
         self.assertEqual(response.getStatus(), 200)
         body = response.getBody()
         self.assertTrue('<iframe src="."' in body)
-        self.checkForBrokenLinks(response, '/image/@@preview.html', 'mgr:mgrpw')
+        self.checkForBrokenLinks(
+            response, '/image/@@preview.html', 'mgr:mgrpw')
 
 
 checker = renormalizing.RENormalizing([
@@ -388,10 +390,10 @@ def test_suite():
             fname,
             checker=checker,
             globs={'http': http},
-        optionflags=(doctest.ELLIPSIS
-                     | doctest.NORMALIZE_WHITESPACE
-                     | doctest.IGNORE_EXCEPTION_DETAIL
-                     | renormalizing.IGNORE_EXCEPTION_MODULE_IN_PYTHON2))
+            optionflags=(doctest.ELLIPSIS
+                         | doctest.NORMALIZE_WHITESPACE
+                         | doctest.IGNORE_EXCEPTION_DETAIL
+                         | renormalizing.IGNORE_EXCEPTION_MODULE_IN_PYTHON2))
         test.layer = AppFileLayer
         return test
 

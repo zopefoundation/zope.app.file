@@ -24,12 +24,12 @@ from zope.app.file.i18n import ZopeMessageFactory as _
 class IFile(Interface):
 
     contentType = NativeStringLine(
-        title = _(u'Content Type'),
+        title=_(u'Content Type'),
         description=_(u'The content type identifies the type of data.'),
         default='',
         required=False,
         missing_value=''
-        )
+    )
 
     data = Bytes(
         title=_(u'Data'),
@@ -37,10 +37,11 @@ class IFile(Interface):
         default=b'',
         missing_value=b'',
         required=False,
-        )
+    )
 
     def getSize():
         """Return the byte-size of the data of the object."""
+
 
 class IImage(IFile):
     """This interface defines an Image that can be displayed.

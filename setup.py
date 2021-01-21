@@ -22,13 +22,15 @@
 import os
 from setuptools import setup, find_packages
 
+
 def read(*rnames):
     with open(os.path.join(os.path.dirname(__file__), *rnames)) as f:
         return f.read()
 
+
 setup(name='zope.app.file',
-      version='4.0.1.dev0',
-      author='Zope Corporation and Contributors',
+      version='4.1.0.dev0',
+      author='Zope Foundation and Contributors',
       author_email='zope-dev@zope.org',
       description='File and Image -- Zope 3 Content Components',
       long_description=(
@@ -39,7 +41,7 @@ setup(name='zope.app.file',
           read('src', 'zope', 'app', 'file', 'browser', 'url.rst')
           + '\n\n' +
           read('CHANGES.rst')
-          ),
+      ),
       keywords="zope3 file image content",
       classifiers=[
           'Development Status :: 5 - Production/Stable',
@@ -50,9 +52,11 @@ setup(name='zope.app.file',
           'Programming Language :: Python :: 2',
           'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3',
-          'Programming Language :: Python :: 3.4',
           'Programming Language :: Python :: 3.5',
           'Programming Language :: Python :: 3.6',
+          'Programming Language :: Python :: 3.7',
+          'Programming Language :: Python :: 3.8',
+          'Programming Language :: Python :: 3.9',
           'Programming Language :: Python :: Implementation :: CPython',
           'Programming Language :: Python :: Implementation :: PyPy',
           'Natural Language :: English',
@@ -60,7 +64,7 @@ setup(name='zope.app.file',
           'Topic :: Internet :: WWW/HTTP',
           'Framework :: Zope :: 3',
       ],
-      url='http://pypi.python.org/pypi/zope.app.file',
+      url='https://github.com/zopefoundation/zope.app.file',
       license='ZPL 2.1',
       packages=find_packages('src'),
       package_dir={'': 'src'},
@@ -105,4 +109,4 @@ setup(name='zope.app.file',
       ],
       include_package_data=True,
       zip_safe=False,
-)
+      )

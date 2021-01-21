@@ -24,8 +24,10 @@ from zope.app.file.browser.image import ImageData
 from zope.app.file.browser.image import ImageAdd
 from zope.traversing.browser.interfaces import IAbsoluteURL
 
+
 class FakeRequest(object):
     pass
+
 
 @adapter(Image, FakeRequest)
 @implementer(IAbsoluteURL)
@@ -38,6 +40,7 @@ class StubAbsoluteURL(object):
         return '/img'
 
     __call__ = __str__
+
 
 class ImageDataTest(PlacelessSetup, unittest.TestCase):
 
@@ -55,25 +58,31 @@ class ImageDataTest(PlacelessSetup, unittest.TestCase):
         fe.context = image
         fe.request = FakeRequest()
 
-        self.assertEqual(fe.tag(),
-                         '<img src="/img" alt="" height="-1" width="-1" border="0" />')
-        self.assertEqual(fe.tag(scale=.9, width=10, height=10),
-                         '<img src="/img" alt="" height="9" width="9" border="0" />')
-        self.assertEqual(fe.tag(alt="Test Image"),
-                         '<img src="/img" alt="Test Image" '
-                         'height="-1" width="-1" border="0" />')
-        self.assertEqual(fe.tag(height=100, width=100),
-                         ('<img src="/img" alt="" height="100" '
-                          'width="100" border="0" />'))
-        self.assertEqual(fe.tag(border=1),
-                         '<img src="/img" alt="" height="-1" width="-1" border="1" />')
-        self.assertEqual(fe.tag(css_class="Image"),
-                         '<img src="/img" alt="" '
-                         'height="-1" width="-1" border="0" class="Image" />')
-        self.assertEqual(fe.tag(height=100, width="100",
-                                border=1, css_class="Image"),
-                         '<img src="/img" alt="" '
-                         'height="100" width="100" class="Image" border="1" />')
+        self.assertEqual(
+            fe.tag(),
+            '<img src="/img" alt="" height="-1" width="-1" border="0" />')
+        self.assertEqual(
+            fe.tag(scale=.9, width=10, height=10),
+            '<img src="/img" alt="" height="9" width="9" border="0" />')
+        self.assertEqual(
+            fe.tag(alt="Test Image"),
+            '<img src="/img" alt="Test Image"'
+            ' height="-1" width="-1" border="0" />')
+        self.assertEqual(
+            fe.tag(height=100, width=100),
+            '<img src="/img" alt="" height="100" width="100" border="0" />')
+        self.assertEqual(
+            fe.tag(border=1),
+            '<img src="/img" alt="" height="-1" width="-1" border="1" />')
+        self.assertEqual(
+            fe.tag(css_class="Image"),
+            '<img src="/img" alt=""'
+            ' height="-1" width="-1" border="0" class="Image" />')
+        self.assertEqual(
+            fe.tag(height=100, width="100", border=1, css_class="Image"),
+            '<img src="/img" alt=""'
+            ' height="100" width="100" class="Image" border="1" />')
+
 
 class TestImageAdd(unittest.TestCase):
 
@@ -82,8 +91,10 @@ class TestImageAdd(unittest.TestCase):
         add.update_status = "Hi"
         self.assertEqual(add.update(), "Hi")
 
+
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)
+
 
 if __name__ == '__main__':
     unittest.main()

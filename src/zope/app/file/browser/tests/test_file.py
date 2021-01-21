@@ -31,9 +31,10 @@ def test_suite():
         setUp=setUp,
         tearDown=tearDown,
         checker=checker,
-    optionflags=(doctest.ELLIPSIS
-                 | doctest.NORMALIZE_WHITESPACE
-                 | renormalizing.IGNORE_EXCEPTION_MODULE_IN_PYTHON2))
+        optionflags=(doctest.ELLIPSIS
+                     | doctest.NORMALIZE_WHITESPACE
+                     | renormalizing.IGNORE_EXCEPTION_MODULE_IN_PYTHON2))
+
 
 if __name__ == '__main__':
     unittest.main(defaultTest="test_suite")

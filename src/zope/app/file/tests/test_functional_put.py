@@ -20,6 +20,7 @@ import unittest
 from zope.app.file.tests import http
 from zope.app.file.testing import AppFileLayer
 
+
 class TestPUT(unittest.TestCase):
 
     layer = AppFileLayer
@@ -33,13 +34,13 @@ Content-Type: text/plain
 
 This is just a test.""")
 
-        self.assertEquals(response.getStatus(), 201)
-        self.assertEquals(response.getHeader("Location"),
-                          "http://localhost/testfile.txt")
+        self.assertEqual(response.getStatus(), 201)
+        self.assertEqual(response.getHeader("Location"),
+                         "http://localhost/testfile.txt")
 
         response = http(r"""GET /testfile.txt HTTP/1.1
 Authorization: Basic globalmgr:globalmgrpw""")
-        self.assertEquals(response.getBody(), b"This is just a test.")
+        self.assertEqual(response.getBody(), b"This is just a test.")
 
         # now modify it
         response = http(r"""PUT /testfile.txt HTTP/1.1
@@ -48,12 +49,12 @@ Content-Length: 23
 Content-Type: text/plain
 
 And now it is modified.""")
-        self.assertEquals(response.getStatus(), 200)
-        self.assertEquals(response.getBody(), b"")
+        self.assertEqual(response.getStatus(), 200)
+        self.assertEqual(response.getBody(), b"")
 
         response = http(r"""GET /testfile.txt HTTP/1.1
 Authorization: Basic globalmgr:globalmgrpw""")
-        self.assertEquals(response.getBody(), b"And now it is modified.")
+        self.assertEqual(response.getBody(), b"And now it is modified.")
 
 
 def test_suite():

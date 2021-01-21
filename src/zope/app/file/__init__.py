@@ -14,7 +14,5 @@
 """File and Image content components
 
 """
-__docformat__ = 'restructuredtext'
-
 from .file import File
 from .image import Image
