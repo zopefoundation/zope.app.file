@@ -32,13 +32,14 @@ zptlogo = (
     b'\xa8\xc1\xca\xa6\xc0\xc9\xa4\xbe\xc8\xa2\xbd\xc7\xa0\xbb\xc5\x9e\xba\xc4'
     b'\x9b\xbf\xcc\x98\xb6\xc1\x8d\xae\xbaFgs\x00\x00\x00\x00\x00\x00\x00\x00'
     b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
-    b'\x00,\x00\x00\x00\x00\x10\x00\x10\x00\x00\x06z@\x80pH,\x12k\xc8$\xd2f\x04'
-    b'\xd4\x84\x01\x01\xe1\xf0d\x16\x9f\x80A\x01\x91\xc0ZmL\xb0\xcd\x00V\xd4'
-    b'\xc4a\x87z\xed\xb0-\x1a\xb3\xb8\x95\xbdf8\x1e\x11\xca,MoC$\x15\x18{'
+    b'\x00,\x00\x00\x00\x00\x10\x00\x10\x00\x00\x06z@\x80pH,\x12k\xc8$\xd2f'
+    b'\x04\xd4\x84\x01\x01\xe1\xf0d\x16\x9f\x80A\x01\x91\xc0ZmL\xb0\xcd\x00V'
+    b'\xd4\xc4a\x87z\xed\xb0-\x1a\xb3\xb8\x95\xbdf8\x1e\x11\xca,MoC$\x15\x18{'
     b'\x006}m\x13\x16\x1a\x1f\x83\x85}6\x17\x1b $\x83\x00\x86\x19\x1d!%)\x8c'
     b'\x866#\'+.\x8ca`\x1c`(,/1\x94B5\x19\x1e"&*-024\xacNq\xba\xbb\xb8h\xbeb'
     b'\x00A\x00;'
-    )
+)
+
 
 class TestImage(unittest.TestCase):
 
@@ -70,6 +71,7 @@ class TestImage(unittest.TestCase):
         self.assertTrue(IImage.implementedBy(Image))
         self.assertTrue(verifyClass(IImage, Image))
 
+
 class TestFileAdapters(unittest.TestCase):
 
     def _makeFile(self, *args, **kw):
@@ -88,6 +90,7 @@ class TestFileAdapters(unittest.TestCase):
         content = b"This is some file\ncontent."
         FileWriteFile(file).write(content)
         self.assertEqual(file.data, content)
+
 
 class DummyImage(object):
 
@@ -118,7 +121,6 @@ class TestFileFactory(unittest.TestCase):
         self.assertIsInstance(f, File)
         self.assertNotIsInstance(f, Image)
         f = factory("spam.txt", "", b"\0\1\2\3\4")
-        self.assert_(isinstance(f, File), f)
         self.assertIsInstance(f, File)
         self.assertNotIsInstance(f, Image)
         f = factory("spam.txt", "text/splat", zptlogo)
@@ -165,23 +167,26 @@ class TestGetImageInfo(unittest.TestCase):
         return getImageInfo(data)
 
     def test_getImageInfo(self):
-        t, w, h = self._info(b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00\xff\xdb\x00C")
+        t, w, h = self._info(
+            b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00"
+            b"\x00\xff\xdb\x00C")
         self.assertEqual(t, "image/jpeg")
         self.assertEqual(w, -1)
         self.assertEqual(h, -1)
 
     def test_getImageInfo_jpeg(self):
-        data = (b'\xff\xd8\x00\xff\xe0\x00\x10JFIF\x00\x01\x02\x00\x00\x01\x00\x01\x00\x00\xff\xdb\x00C'
-                b'\x00\t\x06\x07\x08\x07\x06\t\x08\x08\x08\n\n\t\x0b\x0e\x17\x0f\x0e\r\r\x0e\x1c\x14'
-                b'\x15\x11\x17"\x1e##!\x1e  %*5-%\'2(  .?/279<<<$-BFA:F5;<9\xff\xdb\x00C\x01\n\n\n\x0e'
-                b'\x0c\x0e\x1b\x0f\x0f\x1b9& &99999999999999999999999999999999999999999999999999\xff'
-                b'\xc0\x00\x11\x08\x04\x80\x08\x00')
+        data = (
+            b'\xff\xd8\x00\xff\xe0\x00\x10JFIF\x00\x01\x02\x00\x00\x01\x00\x01'
+            b'\x00\x00\xff\xdb\x00C\x00\t\x06\x07\x08\x07\x06\t\x08\x08\x08\n'
+            b'\n\t\x0b\x0e\x17\x0f\x0e\r\r\x0e\x1c\x14\x15\x11\x17"\x1e##!\x1e'
+            b'  %*5-%\'2(  .?/279<<<$-BFA:F5;<9\xff\xdb\x00C\x01\n\n\n\x0e'
+            b'\x0c\x0e\x1b\x0f\x0f\x1b9& &999999999999999999999999999999999999'
+            b'99999999999999\xff\xc0\x00\x11\x08\x04\x80\x08\x00')
 
         t, w, h = self._info(data)
         self.assertEqual(t, "image/jpeg")
         self.assertEqual(w, 2048)
         self.assertEqual(h, 1152)
-
 
     def test_getImageInfo_bmp(self):
         t, w, h = self._info(b'BMl\x05\x00\x00\x00\x00\x00\x006\x04\x00\x00('
@@ -194,7 +199,9 @@ class TestGetImageInfo(unittest.TestCase):
         self.assertEqual(h, 16)
 
     def test_getImageInfo_png(self):
-        data = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x05\x1c\x00\x00\x01p\x08\x06\x00\x00\x00\xda\x1b\xb7'
+        data = (
+            b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x05\x1c\x00\x00\x01'
+            b'p\x08\x06\x00\x00\x00\xda\x1b\xb7')
         t, w, h = self._info(data)
         self.assertEqual(t, "image/png")
         self.assertEqual(w, 1308)
@@ -203,6 +210,3 @@ class TestGetImageInfo(unittest.TestCase):
 
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)
-
-if __name__ == '__main__':
-    unittest.TextTestRunner().run(test_suite())

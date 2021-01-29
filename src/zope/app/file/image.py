@@ -74,7 +74,7 @@ class ImageSized(object):
         if mapping is None:
             mapping = {}
         mapping.update({'width': str(w), 'height': str(h)})
-        #TODO the way this message id is defined, it won't be picked up by
+        # TODO the way this message id is defined, it won't be picked up by
         # i18nextract and never show up in message catalogs
         return _(byte_size + ' ${width}x${height}', mapping=mapping)
 
@@ -94,6 +94,7 @@ class FileFactory(object):
             return Image(data)
 
         return File(data, content_type)
+
 
 def getImageInfo(data):
     data = bytes(data)
@@ -121,7 +122,8 @@ def getImageInfo(data):
         height = int(h)
 
     # Maybe this is for an older PNG version.
-    elif (size >= 16) and data.startswith(b'\211PNG\r\n\032\n'): # pragma: no cover
+    elif ((size >= 16)
+          and data.startswith(b'\211PNG\r\n\032\n')):  # pragma: no cover
         # Check to see if we have the right content type
         content_type = 'image/png'
         w, h = struct.unpack(">LL", data[8:16])
@@ -151,13 +153,13 @@ def getImageInfo(data):
                 b = jpeg.read(1)
             width = int(w)
             height = int(h)
-        except (struct.error, ValueError): # pragma: no cover
+        except (struct.error, ValueError):  # pragma: no cover
             pass
 
     # handle BMPs
     elif (size >= 30) and data.startswith(b'BM'):
         kind = struct.unpack(b"<H", data[14:16])[0]
-        if kind == 40: # Windows 3.x bitmap
+        if kind == 40:  # Windows 3.x bitmap
             content_type = 'image/x-ms-bmp'
             width, height = struct.unpack(b"<LL", data[18:26])
 

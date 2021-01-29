@@ -1,0 +1,27 @@
+# Generated from:
+# https://github.com/zopefoundation/meta/tree/master/config/pure-python
+[meta]
+template = "pure-python"
+commit-id = "ec18e00a8bc6383a44fdb7b00cb2f8b789a703ad"
+
+[python]
+with-appveyor = false
+with-pypy = true
+with-legacy-python = true
+with-docs = false
+with-sphinx-doctests = false
+
+[coverage]
+fail-under = 98
+
+[flake8]
+additional-config = [
+    "# F401 imported but unused",
+    "per-file-ignores =",
+    "    src/zope/app/file/__init__.py: F401",
+    ]
+
+[manifest]
+additional-rules = [
+    "recursive-include src *.gif",
+    ]

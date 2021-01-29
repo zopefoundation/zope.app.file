@@ -31,7 +31,7 @@ optionally upload the contents of the file.
   ... GET /+/zope.app.file.File= HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """))
-  HTTP/1.1 200 OK
+  HTTP/1.1 200 Ok
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
   <BLANKLINE>
@@ -102,7 +102,7 @@ filename.
   ... GET /hello.txt.gz HTTP/1.1
   ... """)
   >>> print(response)
-  HTTP/1.1 200 OK
+  HTTP/1.1 200 Ok
   Content-Length: 36
   Content-Type: application/octet-stream
   <BLANKLINE>
@@ -156,7 +156,7 @@ The file should be saved as "test.gz", let's check it name and contents.
   ... GET /test.gz HTTP/1.1
   ... """)
   >>> print(response)
-  HTTP/1.1 200 OK
+  HTTP/1.1 200 Ok
   Content-Length: 36
   Content-Type: application/octet-stream
   <BLANKLINE>
@@ -207,7 +207,7 @@ The file is initially empty, since we did not upload anything.
   >>> print(http("""
   ... GET /sample.txt HTTP/1.1
   ... """))
-  HTTP/1.1 200 OK
+  HTTP/1.1 200 Ok
   Content-Length: 0
   Content-Type: text/plain
   Last-Modified: ...
@@ -219,7 +219,7 @@ Since it is a text file, we can edit it directly in a web form.
   ... GET /sample.txt/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """, handle_errors=False))
-  HTTP/1.1 200 OK
+  HTTP/1.1 200 Ok
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
   <BLANKLINE>
@@ -267,7 +267,7 @@ So you can use ASCII text.
   ... Change
   ... -----------------------------165727764114325486311042046845--
   ... """, handle_errors=False))
-  HTTP/1.1 200 OK
+  HTTP/1.1 200 Ok
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
   <BLANKLINE>
@@ -304,7 +304,7 @@ Here's the file
   >>> print(http(r"""
   ... GET /sample.txt HTTP/1.1
   ... """))
-  HTTP/1.1 200 OK
+  HTTP/1.1 200 Ok
   Content-Length: ...
   Content-Type: text/plain
   Last-Modified: ...
@@ -319,7 +319,7 @@ Non-ASCII Text Files
 
 We can also use non-ASCII charactors in text file.
 
-  >>> print(http("""
+  >>> print(http(b"""
   ... POST /sample.txt/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... Content-Type: multipart/form-data; boundary=---------------------------165727764114325486311042046845
@@ -340,7 +340,7 @@ We can also use non-ASCII charactors in text file.
   ... Change
   ... -----------------------------165727764114325486311042046845--
   ... """))
-  HTTP/1.1 200 OK
+  HTTP/1.1 200 Ok
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
   <BLANKLINE>
@@ -378,7 +378,7 @@ Here's the file
   ... GET /sample.txt HTTP/1.1
   ... """)
   >>> print(response)
-  HTTP/1.1 200 OK
+  HTTP/1.1 200 Ok
   Content-Length: ...
   Content-Type: text/plain
   Last-Modified: ...
@@ -392,7 +392,7 @@ Here's the file
 
 And you can explicitly specify the charset. Note that the browser form is always UTF-8.
 
-  >>> print(http("""
+  >>> print(http(b"""
   ... POST /sample.txt/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... Content-Type: multipart/form-data; boundary=---------------------------165727764114325486311042046845
@@ -413,7 +413,7 @@ And you can explicitly specify the charset. Note that the browser form is always
   ... Change
   ... -----------------------------165727764114325486311042046845--
   ... """))
-  HTTP/1.1 200 OK
+  HTTP/1.1 200 Ok
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
   <BLANKLINE>
@@ -451,7 +451,7 @@ Here's the file
   ... GET /sample.txt HTTP/1.1
   ... """)
   >>> print(response)
-  HTTP/1.1 200 OK
+  HTTP/1.1 200 Ok
   Content-Length: ...
   Content-Type: text/plain; charset=ISO-8859-1
   Last-Modified: ...
@@ -489,7 +489,7 @@ the characters.
   ... Change
   ... -----------------------------165727764114325486311042046845--
   ... """, handle_errors=False))
-  HTTP/1.1 200 OK
+  HTTP/1.1 200 Ok
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
   <BLANKLINE>
@@ -542,7 +542,7 @@ Likewise, the user is not allowed to specify a character set that is not support
   ... Change
   ... -----------------------------165727764114325486311042046845--
   ... """, handle_errors=False))
-  HTTP/1.1 200 OK
+  HTTP/1.1 200 Ok
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
   <BLANKLINE>
@@ -579,7 +579,7 @@ match the file contents, you will not be able to access the edit view:
   ... GET /hello.txt.gz/@@edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """, handle_errors=True))
-  HTTP/1.1 200 OK
+  HTTP/1.1 200 Ok
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
   <BLANKLINE>
@@ -632,8 +632,9 @@ filename.
   ... GET /bj%C3%B6rn.txt.gz HTTP/1.1
   ... """)
   >>> print(response)
-  HTTP/1.1 200 OK
+  HTTP/1.1 200 Ok
   Content-Length: 36
   Content-Type: application/octet-stream
+  Last-Modified: ...
   <BLANKLINE>
   ...

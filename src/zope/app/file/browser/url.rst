@@ -61,14 +61,14 @@ it is:
   ... Change
   ... -----------------------------10196264131256436092131136054--
   ... """))
-  HTTP/1.1 200 OK
+  HTTP/1.1 200 Ok
   ...
 
   >>> print(http(r"""
   ... GET /file.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """))
-  HTTP/1.1 200 OK
+  HTTP/1.1 200 Ok
   ...
   <html>
   <head></head>
@@ -82,7 +82,7 @@ it is:
   ... GET /file.html/ HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """))
-  HTTP/1.1 200 OK
+  HTTP/1.1 200 Ok
   ...
   <html>
   <head>

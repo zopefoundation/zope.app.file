@@ -71,7 +71,7 @@ class ImageData(FileView):
         if width is not None:
             result = '%s width="%s"' % (result, width)
 
-        if not 'border' in [a.lower() for a in args]:
+        if 'border' not in [a.lower() for a in args]:
             result = '%s border="0"' % result
 
         if css_class is not None:
@@ -106,4 +106,4 @@ class ImageAdd(object):
             if filename is not None:
                 self.request.form["add_input_name"] = cleanupFileName(filename)
 
-        return super(ImageAdd,self).update()
+        return super(ImageAdd, self).update()

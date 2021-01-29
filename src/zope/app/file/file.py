@@ -29,6 +29,7 @@ try:
 except NameError:
     text_type = str
 
+
 @implementer(zope.app.publication.interfaces.IFileContent,
              interfaces.IFile)
 class File(Persistent):
@@ -188,7 +189,7 @@ class File(Persistent):
         while end > 0:
             pos = end - MAXCHUNKSIZE
             if pos < MAXCHUNKSIZE:
-                pos = 0 # we always want at least MAXCHUNKSIZE bytes
+                pos = 0  # we always want at least MAXCHUNKSIZE bytes
             seek(pos)
             data = FileChunk(read(end - pos))
 
@@ -269,6 +270,7 @@ class FileReadFile(object):
     >>> FileReadFile(file).size() == len(content)
     True
     '''
+
     def __init__(self, context):
         self.context = context
 
@@ -288,6 +290,7 @@ class FileWriteFile(object):
     >>> file.data == content
     True
     """
+
     def __init__(self, context):
         self.context = context
 
