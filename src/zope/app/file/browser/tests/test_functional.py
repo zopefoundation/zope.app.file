@@ -375,7 +375,6 @@ class ImageTest(BrowserTestCase):
             response, '/image/@@preview.html', 'mgr:mgrpw')
 
 
-
 def test_suite():
     def _make_doctest(fname):
         test = doctest.DocFileSuite(
