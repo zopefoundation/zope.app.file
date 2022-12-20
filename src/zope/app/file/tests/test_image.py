@@ -15,10 +15,17 @@
 
 """
 import unittest
+
 from zope.interface.verify import verifyClass
+
+from zope.app.file.file import File
+from zope.app.file.file import FileReadFile
+from zope.app.file.file import FileWriteFile
+from zope.app.file.image import FileFactory
+from zope.app.file.image import Image
+from zope.app.file.image import ImageSized
 from zope.app.file.interfaces import IImage
-from zope.app.file.image import Image, FileFactory, ImageSized
-from zope.app.file.file import File, FileWriteFile, FileReadFile
+
 
 zptlogo = (
     b'GIF89a\x10\x00\x10\x00\xd5\x00\x00\xff\xff\xff\xff\xff\xfe\xfc\xfd\xfd'
@@ -92,7 +99,7 @@ class TestFileAdapters(unittest.TestCase):
         self.assertEqual(file.data, content)
 
 
-class DummyImage(object):
+class DummyImage:
 
     def __init__(self, width, height, bytes):
         self.width = width
@@ -141,21 +148,21 @@ class TestSized(unittest.TestCase):
     def test_zeroSized(self):
         s = ImageSized(DummyImage(0, 0, 0))
         self.assertEqual(s.sizeForSorting(), ('byte', 0))
-        self.assertEqual(s.sizeForDisplay(), u'0 KB ${width}x${height}')
+        self.assertEqual(s.sizeForDisplay(), '0 KB ${width}x${height}')
         self.assertEqual(s.sizeForDisplay().mapping['width'], '0')
         self.assertEqual(s.sizeForDisplay().mapping['height'], '0')
 
     def test_arbitrarySize(self):
         s = ImageSized(DummyImage(34, 56, 78))
         self.assertEqual(s.sizeForSorting(), ('byte', 78))
-        self.assertEqual(s.sizeForDisplay(), u'1 KB ${width}x${height}')
+        self.assertEqual(s.sizeForDisplay(), '1 KB ${width}x${height}')
         self.assertEqual(s.sizeForDisplay().mapping['width'], '34')
         self.assertEqual(s.sizeForDisplay().mapping['height'], '56')
 
     def test_unknownSize(self):
         s = ImageSized(DummyImage(-1, -1, 23))
         self.assertEqual(s.sizeForSorting(), ('byte', 23))
-        self.assertEqual(s.sizeForDisplay(), u'1 KB ${width}x${height}')
+        self.assertEqual(s.sizeForDisplay(), '1 KB ${width}x${height}')
         self.assertEqual(s.sizeForDisplay().mapping['width'], '?')
         self.assertEqual(s.sizeForDisplay().mapping['height'], '?')
 

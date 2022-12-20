@@ -17,8 +17,8 @@
 
 import unittest
 
-from zope.app.file.tests import http
 from zope.app.file.testing import AppFileLayer
+from zope.app.file.tests import http
 
 
 class TestPUT(unittest.TestCase):

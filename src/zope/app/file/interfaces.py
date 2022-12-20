@@ -16,24 +16,26 @@
 """
 __docformat__ = 'restructuredtext'
 
-from zope.schema import NativeStringLine, Bytes
 from zope.interface import Interface
+from zope.schema import Bytes
+from zope.schema import NativeStringLine
+
 from zope.app.file.i18n import ZopeMessageFactory as _
 
 
 class IFile(Interface):
 
     contentType = NativeStringLine(
-        title=_(u'Content Type'),
-        description=_(u'The content type identifies the type of data.'),
+        title=_('Content Type'),
+        description=_('The content type identifies the type of data.'),
         default='',
         required=False,
         missing_value=''
     )
 
     data = Bytes(
-        title=_(u'Data'),
-        description=_(u'The actual content of the object.'),
+        title=_('Data'),
+        description=_('The actual content of the object.'),
         default=b'',
         missing_value=b'',
         required=False,

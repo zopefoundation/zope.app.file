@@ -16,22 +16,24 @@
 """
 import unittest
 
-from zope.component import adapter, provideAdapter
+from zope.component import adapter
+from zope.component import provideAdapter
 from zope.component.testing import PlacelessSetup
 from zope.interface import implementer
-from zope.app.file.image import Image
-from zope.app.file.browser.image import ImageData
-from zope.app.file.browser.image import ImageAdd
 from zope.traversing.browser.interfaces import IAbsoluteURL
 
+from zope.app.file.browser.image import ImageAdd
+from zope.app.file.browser.image import ImageData
+from zope.app.file.image import Image
 
-class FakeRequest(object):
+
+class FakeRequest:
     pass
 
 
 @adapter(Image, FakeRequest)
 @implementer(IAbsoluteURL)
-class StubAbsoluteURL(object):
+class StubAbsoluteURL:
 
     def __init__(self, *objects):
         pass

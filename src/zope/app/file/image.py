@@ -19,13 +19,13 @@ __docformat__ = 'restructuredtext'
 import struct
 from io import BytesIO
 
-from zope.interface import implementer
-from zope.size.interfaces import ISized
-from zope.size import byteDisplay
 from zope.contenttype import guess_content_type
+from zope.interface import implementer
+from zope.size import byteDisplay
+from zope.size.interfaces import ISized
 
-from zope.app.file.i18n import ZopeMessageFactory as _
 from zope.app.file.file import File
+from zope.app.file.i18n import ZopeMessageFactory as _
 from zope.app.file.interfaces import IImage
 
 
@@ -35,10 +35,10 @@ class Image(File):
     def __init__(self, data=b''):
         '''See interface `IFile`'''
         contentType, self._width, self._height = getImageInfo(data)
-        super(Image, self).__init__(data, contentType)
+        super().__init__(data, contentType)
 
     def _setData(self, data):
-        super(Image, self)._setData(data)
+        super()._setData(data)
 
         contentType, self._width, self._height = getImageInfo(self._data)
         if contentType:
@@ -52,7 +52,7 @@ class Image(File):
 
 
 @implementer(ISized)
-class ImageSized(object):
+class ImageSized:
 
     def __init__(self, image):
         self._image = image
@@ -79,7 +79,7 @@ class ImageSized(object):
         return _(byte_size + ' ${width}x${height}', mapping=mapping)
 
 
-class FileFactory(object):
+class FileFactory:
 
     def __init__(self, context):
         self.context = context
