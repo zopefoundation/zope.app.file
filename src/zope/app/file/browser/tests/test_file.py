@@ -14,12 +14,13 @@
 """Tests for zope.app.file.browser.file.
 
 """
-import re
-from zope.testing import renormalizing
-
-from zope.component.testing import setUp, tearDown
 import doctest
+import re
 import unittest
+
+from zope.component.testing import setUp
+from zope.component.testing import tearDown
+from zope.testing import renormalizing
 
 
 def test_suite():

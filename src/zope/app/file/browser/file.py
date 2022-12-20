@@ -14,28 +14,27 @@
 """File views.
 
 """
-from __future__ import print_function
-
-import zope.event
-from zope import lifecycleevent
-from zope.contenttype import guess_content_type
-import zope.contenttype.parse
-from zope.schema import Text
-from zope.exceptions.interfaces import UserError
-
-from zope.app.file.file import File
-from zope.app.file.interfaces import IFile
-from zope.app.file.i18n import ZopeMessageFactory as _
-from zope.dublincore.interfaces import IDCTimes
-import zope.datetime
-
 
 from datetime import datetime
+
+import zope.contenttype.parse
+import zope.datetime
+import zope.event
+from zope.contenttype import guess_content_type
+from zope.dublincore.interfaces import IDCTimes
+from zope.exceptions.interfaces import UserError
+from zope.schema import Text
+
+from zope import lifecycleevent
+from zope.app.file.file import File
+from zope.app.file.i18n import ZopeMessageFactory as _
+from zope.app.file.interfaces import IFile
+
 
 __docformat__ = 'restructuredtext'
 
 
-class FileView(object):
+class FileView:
 
     request = None
     context = None
@@ -141,7 +140,7 @@ def cleanupFileName(filename):
     return filename.split('\\')[-1].split('/')[-1]
 
 
-class FileUpdateView(object):
+class FileUpdateView:
 
     def __init__(self, context, request):
         self.context = context
@@ -327,10 +326,10 @@ class IFileEditForm(IFile):
     """
 
     data = Text(
-        title=_(u'Data'),
-        description=_(u'The actual content of the object.'),
-        default=u'',
-        missing_value=u'',
+        title=_('Data'),
+        description=_('The actual content of the object.'),
+        default='',
+        missing_value='',
         required=False,
     )
 
@@ -343,7 +342,7 @@ class CharsetTooWeak(Exception):
     """Character set cannot encode all characters in text."""
 
 
-class FileEdit(object):
+class FileEdit:
     r"""File edit form mixin.
 
     Lets the user edit a text file directly via a browser form.
@@ -493,7 +492,7 @@ class FileEdit(object):
 
     def update(self):
         try:
-            return super(FileEdit, self).update()
+            return super().update()
         except CharsetTooWeak as charset:
             self.update_status = _("The character set you specified ($charset)"
                                    " cannot encode all characters in text.",

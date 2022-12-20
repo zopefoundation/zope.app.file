@@ -17,8 +17,10 @@
 __docformat__ = 'restructuredtext'
 
 from zope.size.interfaces import ISized
-from zope.app.file.browser.file import FileView, cleanupFileName
 from zope.traversing.browser.absoluteurl import absoluteURL
+
+from zope.app.file.browser.file import FileView
+from zope.app.file.browser.file import cleanupFileName
 
 
 class ImageData(FileView):
@@ -63,27 +65,27 @@ class ImageData(FileView):
 
         if alt is None:
             alt = getattr(self, 'title', '')
-        result = '%s alt="%s"' % (result, alt)
+        result = '{} alt="{}"'.format(result, alt)
 
         if height is not None:
-            result = '%s height="%s"' % (result, height)
+            result = '{} height="{}"'.format(result, height)
 
         if width is not None:
-            result = '%s width="%s"' % (result, width)
+            result = '{} width="{}"'.format(result, width)
 
         if 'border' not in [a.lower() for a in args]:
             result = '%s border="0"' % result
 
         if css_class is not None:
-            result = '%s class="%s"' % (result, css_class)
+            result = '{} class="{}"'.format(result, css_class)
 
         for key, value in args.items():
-            result = '%s %s="%s"' % (result, key, value)
+            result = '{} {}="{}"'.format(result, key, value)
 
         return '%s />' % result
 
 
-class ImageUpload(object):
+class ImageUpload:
     """Image edit view mix-in that provides access to image size info"""
 
     def size(self):
@@ -91,7 +93,7 @@ class ImageUpload(object):
         return sized.sizeForDisplay()
 
 
-class ImageAdd(object):
+class ImageAdd:
 
     def update(self):
 
@@ -106,4 +108,4 @@ class ImageAdd(object):
             if filename is not None:
                 self.request.form["add_input_name"] = cleanupFileName(filename)
 
-        return super(ImageAdd, self).update()
+        return super().update()

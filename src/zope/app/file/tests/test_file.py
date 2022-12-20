@@ -16,7 +16,6 @@
 """
 import doctest
 import unittest
-
 from io import BytesIO
 
 from zope.app.file import file as zfile
@@ -42,7 +41,7 @@ class TestFile(unittest.TestCase):
             zfile.MAXCHUNKSIZE = 10
             data = BytesIO(b'b' * 30)
 
-            class Jar(object):
+            class Jar:
                 added = ()
 
                 def add(self, o):

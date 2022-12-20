@@ -17,18 +17,18 @@
 import doctest
 import re
 import unittest
-from xml.sax.saxutils import escape
 from io import BytesIO
-from zope.testing import renormalizing
+from xml.sax.saxutils import escape
+
+from webtest import TestApp
 from zope.interface.interfaces import ComponentLookupError
+from zope.testing import renormalizing
 
 from zope.app.file.file import File
 from zope.app.file.image import Image
-from zope.app.file.tests.test_image import zptlogo
 from zope.app.file.testing import AppFileLayer
 from zope.app.file.tests import http
-
-from webtest import TestApp
+from zope.app.file.tests.test_image import zptlogo
 
 
 class StringIO(BytesIO):
@@ -36,7 +36,7 @@ class StringIO(BytesIO):
     def __init__(self, contents):
         if not isinstance(contents, bytes):
             contents = contents.encode("ascii")
-        super(StringIO, self).__init__(contents)
+        super().__init__(contents)
 
 
 class BrowserTestCase(unittest.TestCase):
@@ -44,7 +44,7 @@ class BrowserTestCase(unittest.TestCase):
     layer = AppFileLayer
 
     def setUp(self):
-        super(BrowserTestCase, self).setUp()
+        super().setUp()
         self._testapp = TestApp(self.layer.make_wsgi_app())
 
     def getRootFolder(self):
@@ -127,11 +127,11 @@ class FileTest(BrowserTestCase):
     def testAdd(self):
         response = self.publish(
             '/+/zope.app.file.File=',
-            form={'type_name': u'zope.app.file.File',
+            form={'type_name': 'zope.app.file.File',
                   'field.data': StringIO('A file'),
                   'field.data.used': '',
-                  'add_input_name': u'file',
-                  'UPDATE_SUBMIT': u'Add'},
+                  'add_input_name': 'file',
+                  'UPDATE_SUBMIT': 'Add'},
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 302)
         self.assertEqual(response.getHeader('Location'),
@@ -146,10 +146,10 @@ class FileTest(BrowserTestCase):
         data.filename = "test.txt"
         response = self.publish(
             '/+/zope.app.file.File=',
-            form={'type_name': u'zope.app.file.File',
+            form={'type_name': 'zope.app.file.File',
                   'field.data': data,
                   'field.data.used': '',
-                  'UPDATE_SUBMIT': u'Add'},
+                  'UPDATE_SUBMIT': 'Add'},
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 302)
         self.assertEqual(response.getHeader('Location'),
@@ -176,17 +176,17 @@ class FileTest(BrowserTestCase):
         self.addFile()
         response = self.publish(
             '/file/@@edit.html',
-            form={'field.data': u'<h1>A File</h1>',
+            form={'field.data': '<h1>A File</h1>',
                   'field.data.used': '',
-                  'field.contentType': u'text/plain',
-                  'UPDATE_SUBMIT': u'Edit'},
+                  'field.contentType': 'text/plain',
+                  'UPDATE_SUBMIT': 'Edit'},
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 200)
         body = response.getBody()
         self.assertTrue('Change a file' in body)
         self.assertTrue('Content Type' in body)
         self.assertTrue('Data' in body)
-        self.assertTrue(escape(u'<h1>A File</h1>') in body)
+        self.assertTrue(escape('<h1>A File</h1>') in body)
         root = self.getRootFolder()
         file = root['file']
         self.assertEqual(file.data, b'<h1>A File</h1>')
@@ -211,15 +211,15 @@ class FileTest(BrowserTestCase):
             '/file/@@upload.html',
             form={'field.data': StringIO('<h1>A file</h1>'),
                   'field.data.used': '',
-                  'field.contentType': u'text/plain',
-                  'UPDATE_SUBMIT': u'Change'},
+                  'field.contentType': 'text/plain',
+                  'UPDATE_SUBMIT': 'Change'},
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 200)
         body = response.getBody()
         self.assertTrue('Upload a file' in body)
         self.assertTrue('Content Type' in body)
         self.assertTrue('Data' in body)
-        self.assertNotIn(escape(u'<h1>A File</h1>'), body)
+        self.assertNotIn(escape('<h1>A File</h1>'), body)
         root = self.getRootFolder()
         file = root['file']
         self.assertEqual(file.data, b'<h1>A file</h1>')
@@ -273,11 +273,11 @@ class ImageTest(BrowserTestCase):
     def testAdd(self):
         response = self.publish(
             '/+/zope.app.file.Image=',
-            form={'type_name': u'zope.app.image.Image',
+            form={'type_name': 'zope.app.image.Image',
                   'field.data': StringIO(self.content),
                   'field.data.used': '',
-                  'add_input_name': u'image',
-                  'UPDATE_SUBMIT': u'Add'},
+                  'add_input_name': 'image',
+                  'UPDATE_SUBMIT': 'Add'},
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 302)
         self.assertEqual(response.getHeader('Location'),
@@ -292,10 +292,10 @@ class ImageTest(BrowserTestCase):
         data.filename = "test.gif"
         response = self.publish(
             '/+/zope.app.file.Image=',
-            form={'type_name': u'zope.app.image.Image',
+            form={'type_name': 'zope.app.image.Image',
                   'field.data': data,
                   'field.data.used': '',
-                  'UPDATE_SUBMIT': u'Add'},
+                  'UPDATE_SUBMIT': 'Add'},
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 302)
         self.assertEqual(response.getHeader('Location'),
@@ -324,7 +324,7 @@ class ImageTest(BrowserTestCase):
             '/image/@@upload.html',
             form={'field.data': StringIO(''),
                   'field.data.used': '',
-                  'UPDATE_SUBMIT': u'Change'},
+                  'UPDATE_SUBMIT': 'Change'},
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 200)
         body = response.getBody()
@@ -342,7 +342,7 @@ class ImageTest(BrowserTestCase):
         response = self.publish(
             '/image/@@upload.html',
             form={'field.contentType': 'image/png',
-                  'UPDATE_SUBMIT': u'Change'},
+                  'UPDATE_SUBMIT': 'Change'},
             basic='mgr:mgrpw')
         self.assertEqual(response.getStatus(), 200)
         body = response.getBody()

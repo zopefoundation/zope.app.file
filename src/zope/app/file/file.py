@@ -15,11 +15,13 @@
 """
 __docformat__ = 'restructuredtext'
 
-from persistent import Persistent
 import transaction
-from zope.interface import implementer
 import zope.app.publication.interfaces
+from persistent import Persistent
+from zope.interface import implementer
+
 from zope.app.file import interfaces
+
 
 # set the size of the chunks
 MAXCHUNKSIZE = 1 << 16
@@ -258,7 +260,7 @@ class FileChunk(Persistent):
             return self.__bytes__().decode("iso-8859-1", errors='ignore')
 
 
-class FileReadFile(object):
+class FileReadFile:
     '''Adapter for file-system style read access.
 
     >>> file = File()
@@ -281,7 +283,7 @@ class FileReadFile(object):
         return len(self.context.data)
 
 
-class FileWriteFile(object):
+class FileWriteFile:
     """Adapter for file-system style write access.
 
     >>> file = File()
