@@ -259,7 +259,7 @@ class FileUpload(FileUpdateView):
     >>> view = FileUpload(file, request)
     >>> view.errors()
     ModifiedEvent: ('contentType', 'data')
-    u'Updated on ${date_time}'
+    'Updated on ${date_time}'
     >>> file.contentType
     'text/foobar'
     >>> file.data == b'some data'
@@ -276,7 +276,7 @@ class FileUpload(FileUpdateView):
     >>> view = FileUpload(file, request)
     >>> view.errors()
     ModifiedEvent: ('contentType', 'data')
-    u'Updated on ${date_time}'
+    'Updated on ${date_time}'
     >>> file.contentType
     'text/plain'
 
@@ -291,7 +291,7 @@ class FileUpload(FileUpdateView):
     >>> view = FileUpload(file, request)
     >>> view.errors()
     ModifiedEvent: ('contentType',)
-    u'Updated on ${date_time}'
+    'Updated on ${date_time}'
 
 
     Cleanup:
@@ -354,7 +354,7 @@ class FileEdit:
         >>> class FileEditView(FileEdit, BrowserView): pass
         >>> view = FileEditView(File(), TestRequest())
         >>> view.getData()['data']
-        u''
+        ''
         >>> view.getData()['contentType']
         ''
 
@@ -366,9 +366,9 @@ class FileEdit:
         >>> zope.event.subscribers.append(eventLog)
 
         >>> view.setData({'contentType': 'text/plain; charset=ISO-8859-13',
-        ...               'data': u'text \u0105'}) # doctest:+ELLIPSIS
+        ...               'data': 'text \u0105'}) # doctest:+ELLIPSIS
         ObjectModifiedEvent ('data', 'contentType')
-        u'Updated on ${date_time}'
+        'Updated on ${date_time}'
 
         >>> view.context.contentType
         'text/plain; charset=ISO-8859-13'
@@ -376,7 +376,7 @@ class FileEdit:
         True
 
         >>> view.getData()['data']
-        u'text \u0105'
+        'text \u0105'
 
         Cleanup eventlog.
 
@@ -386,7 +386,7 @@ class FileEdit:
     all the characters
 
         >>> view.setData({'contentType': 'text/xml; charset=ISO-8859-1',
-        ...               'data': u'text \u0105'})
+        ...               'data': 'text \u0105'})
         Traceback (most recent call last):
           ...
         zope.app.file.browser.file.CharsetTooWeak: ISO-8859-1
@@ -394,7 +394,7 @@ class FileEdit:
     You will get a different error if you try to specify an invalid charset
 
         >>> view.setData({'contentType': 'text/xml; charset=UNKNOWN',
-        ...               'data': u'text \u0105'})
+        ...               'data': 'text \u0105'})
         Traceback (most recent call last):
           ...
         zope.app.file.browser.file.UnknownCharset: UNKNOWN
@@ -409,9 +409,9 @@ class FileEdit:
         >>> class FileEditView(FileEdit, FakeFormView): pass
         >>> view = FileEditView(File(), TestRequest())
         >>> translate(view.update())
-        u'The character set you specified (ASCII) cannot encode all characters in text.'
+        'The character set you specified (ASCII) cannot encode all characters in text.'
         >>> translate(view.update_status)
-        u'The character set you specified (ASCII) cannot encode all characters in text.'
+        'The character set you specified (ASCII) cannot encode all characters in text.'
 
         >>> class FakeFormView(BrowserView):
         ...     def update(self):
@@ -419,9 +419,9 @@ class FileEdit:
         >>> class FileEditView(FileEdit, FakeFormView): pass
         >>> view = FileEditView(File(), TestRequest())
         >>> translate(view.update())
-        u'The character set you specified (UNKNOWN) is not supported.'
+        'The character set you specified (UNKNOWN) is not supported.'
         >>> translate(view.update_status)
-        u'The character set you specified (UNKNOWN) is not supported.'
+        'The character set you specified (UNKNOWN) is not supported.'
 
     Speaking about errors, if you trick the system and upload a file with
     incorrect charset designation, you will get a UserError when you visit the

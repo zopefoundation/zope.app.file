@@ -15,14 +15,12 @@
 
 """
 import doctest
-import re
 import unittest
 from io import BytesIO
 from xml.sax.saxutils import escape
 
 from webtest import TestApp
 from zope.interface.interfaces import ComponentLookupError
-from zope.testing import renormalizing
 
 from zope.app.file.file import File
 from zope.app.file.image import Image
@@ -377,23 +375,15 @@ class ImageTest(BrowserTestCase):
             response, '/image/@@preview.html', 'mgr:mgrpw')
 
 
-checker = renormalizing.RENormalizing([
-    (re.compile(r"HTTP/1\.0 200 .*"), "HTTP/1.1 200 OK"),
-    (re.compile(r"HTTP/1\.0 303 .*"), "HTTP/1.1 303 See Other"),
-    (re.compile(r"u'(.*)'"), r"'\1'"),
-])
-
 
 def test_suite():
     def _make_doctest(fname):
         test = doctest.DocFileSuite(
             fname,
-            checker=checker,
             globs={'http': http},
             optionflags=(doctest.ELLIPSIS
                          | doctest.NORMALIZE_WHITESPACE
-                         | doctest.IGNORE_EXCEPTION_DETAIL
-                         | renormalizing.IGNORE_EXCEPTION_MODULE_IN_PYTHON2))
+                         | doctest.IGNORE_EXCEPTION_DETAIL))
         test.layer = AppFileLayer
         return test
 
@@ -404,7 +394,3 @@ def test_suite():
         url,
         file,
     ))
-
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='test_suite')

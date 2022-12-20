@@ -15,27 +15,15 @@
 
 """
 import doctest
-import re
-import unittest
 
 from zope.component.testing import setUp
 from zope.component.testing import tearDown
-from zope.testing import renormalizing
 
 
 def test_suite():
-    checker = renormalizing.RENormalizing((
-        (re.compile(r"u'(.*)'"), r"'\1'"),
-    ))
     return doctest.DocTestSuite(
         "zope.app.file.browser.file",
         setUp=setUp,
         tearDown=tearDown,
-        checker=checker,
         optionflags=(doctest.ELLIPSIS
-                     | doctest.NORMALIZE_WHITESPACE
-                     | renormalizing.IGNORE_EXCEPTION_MODULE_IN_PYTHON2))
-
-
-if __name__ == '__main__':
-    unittest.main(defaultTest="test_suite")
+                     | doctest.NORMALIZE_WHITESPACE))
