@@ -20,6 +20,7 @@ from io import BytesIO
 from xml.sax.saxutils import escape
 
 from webtest import TestApp
+from zope.app.wsgi.testlayer import encodeMultipartFormdata
 from zope.interface.interfaces import ComponentLookupError
 
 from zope.app.file.file import File
@@ -379,7 +380,8 @@ def test_suite():
     def _make_doctest(fname):
         test = doctest.DocFileSuite(
             fname,
-            globs={'http': http},
+            globs={'http': http,
+                   'encodeMultipartFormdata': encodeMultipartFormdata},
             optionflags=(doctest.ELLIPSIS
                          | doctest.NORMALIZE_WHITESPACE
                          | doctest.IGNORE_EXCEPTION_DETAIL))

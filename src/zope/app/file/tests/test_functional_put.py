@@ -27,7 +27,7 @@ class TestPUT(unittest.TestCase):
 
     def test_put(self):
         # PUT something for the first time
-        response = http(r"""PUT /testfile.txt HTTP/1.1
+        response = http(b"""PUT /testfile.txt HTTP/1.1
 Authorization: Basic globalmgr:globalmgrpw
 Content-Length: 20
 Content-Type: text/plain
@@ -38,12 +38,12 @@ This is just a test.""")
         self.assertEqual(response.getHeader("Location"),
                          "http://localhost/testfile.txt")
 
-        response = http(r"""GET /testfile.txt HTTP/1.1
+        response = http(b"""GET /testfile.txt HTTP/1.1
 Authorization: Basic globalmgr:globalmgrpw""")
         self.assertEqual(response.getBody(), b"This is just a test.")
 
         # now modify it
-        response = http(r"""PUT /testfile.txt HTTP/1.1
+        response = http(b"""PUT /testfile.txt HTTP/1.1
 Authorization: Basic globalmgr:globalmgrpw
 Content-Length: 23
 Content-Type: text/plain
@@ -52,7 +52,7 @@ And now it is modified.""")
         self.assertEqual(response.getStatus(), 200)
         self.assertEqual(response.getBody(), b"")
 
-        response = http(r"""GET /testfile.txt HTTP/1.1
+        response = http(b"""GET /testfile.txt HTTP/1.1
 Authorization: Basic globalmgr:globalmgrpw""")
         self.assertEqual(response.getBody(), b"And now it is modified.")
 

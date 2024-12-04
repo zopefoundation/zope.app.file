@@ -5,66 +5,38 @@ When an HTML File page containing a head tag is visited, without a
 trailing slash, the base href isn't set.  When visited with a slash,
 it is:
 
-
-  >>> print(http(r"""
-  ... POST /+/zope.app.file.File%3D HTTP/1.1
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'text/html'),
+  ...     ('UPDATE_SUBMIT', 'Add'),
+  ...     ('add_input_name', 'file.html')],
+  ...    [('field.data', '', b'', 'application/octet-stream')])
+  >>> print(http(b"""
+  ... POST /+/zope.app.file.File%%3D HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... Content-Length: 610
-  ... Content-Type: multipart/form-data; boundary=---------------------------32826232819858510771857533856
+  ... Content-Type: %b
   ... Referer: http://localhost:8081/+/zope.app.file.File=
   ...
-  ... -----------------------------32826232819858510771857533856
-  ... Content-Disposition: form-data; name="field.contentType"
-  ...
-  ... text/html
-  ... -----------------------------32826232819858510771857533856
-  ... Content-Disposition: form-data; name="field.data"; filename=""
-  ... Content-Type: application/octet-stream
-  ...
-  ...
-  ... -----------------------------32826232819858510771857533856
-  ... Content-Disposition: form-data; name="UPDATE_SUBMIT"
-  ...
-  ... Add
-  ... -----------------------------32826232819858510771857533856
-  ... Content-Disposition: form-data; name="add_input_name"
-  ...
-  ... file.html
-  ... -----------------------------32826232819858510771857533856--
-  ... """))
+  ... %b
+  ... """ % (content_type, content)))
   HTTP/1.1 303 See Other
   ...
 
-  >>> print(http(r"""
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'text/html'),
+  ...     ('field.data', b'<html>\n<head></head>\n<body>\n<a href="eek.html">Eek</a>\n</body>\n</html>'),
+  ...     ('UPDATE_SUBMIT', 'Change')])
+  >>> print(http(b"""
   ... POST /file.html/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... Content-Length: 507
-  ... Content-Type: multipart/form-data; boundary=---------------------------10196264131256436092131136054
+  ... Content-Type: %b
   ... Referer: http://localhost:8081/file.html/edit.html
   ...
-  ... -----------------------------10196264131256436092131136054
-  ... Content-Disposition: form-data; name="field.contentType"
-  ...
-  ... text/html
-  ... -----------------------------10196264131256436092131136054
-  ... Content-Disposition: form-data; name="field.data"
-  ...
-  ... <html>
-  ... <head></head>
-  ... <body>
-  ... <a href="eek.html">Eek</a>
-  ... </body>
-  ... </html>
-  ... -----------------------------10196264131256436092131136054
-  ... Content-Disposition: form-data; name="UPDATE_SUBMIT"
-  ...
-  ... Change
-  ... -----------------------------10196264131256436092131136054--
-  ... """))
+  ... %b
+  ... """ % (content_type, content)))
   HTTP/1.1 200 Ok
   ...
 
-  >>> print(http(r"""
+  >>> print(http(b"""
   ... GET /file.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """))
@@ -78,7 +50,7 @@ it is:
   </html>
 
 
-  >>> print(http(r"""
+  >>> print(http(b"""
   ... GET /file.html/ HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """))
