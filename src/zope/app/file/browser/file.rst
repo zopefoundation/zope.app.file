@@ -6,7 +6,7 @@ Adding Files
 
 You can add File objects from the common tasks menu in the ZMI.
 
-  >>> result = http(r"""
+  >>> result = http(b"""
   ... GET /@@contents.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """)
@@ -15,7 +15,7 @@ You can add File objects from the common tasks menu in the ZMI.
 
 Let's follow that link.
 
-  >>> print(http(r"""
+  >>> print(http(b"""
   ... GET /@@+/action.html?type_name=zope.app.file.File HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """, handle_errors=False))
@@ -27,7 +27,7 @@ Let's follow that link.
 The file add form lets you specify the content type, the object name, and
 optionally upload the contents of the file.
 
-  >>> print(http(r"""
+  >>> print(http(b"""
   ... GET /+/zope.app.file.File= HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """))
@@ -62,32 +62,23 @@ Binary Files
 
 Let us upload a binary file.
 
+  >>> hello_txt_gz = (
+  ...     b'\x1f\x8b\x08\x08\xcb\x48\xea\x42\x00\x03\x68\x65\x6c\x6c\x6f\x2e'
+  ...     b'\x74\x78\x74\x00\xcb\x48\xcd\xc9\xc9\xe7\x02\x00\x20\x30\x3a\x36'
+  ...     b'\x06\x00\x00\x00')
+
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'application/octet-stream'),
+  ...     ('UPDATE_SUBMIT', 'Add'),
+  ...     ('add_input_name', '')],
+  ...    [('field.data', 'hello.txt.gz', hello_txt_gz, 'application/x-gzip')])
   >>> print(http(b"""
-  ... POST /+/zope.app.file.File%3D HTTP/1.1
+  ... POST /+/zope.app.file.File%%3D HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... Content-Type: multipart/form-data; boundary=---------------------------73793505419963331401738523176
+  ... Content-Type: %b
   ...
-  ... -----------------------------73793505419963331401738523176
-  ... Content-Disposition: form-data; name="field.contentType"
-  ...
-  ... application/octet-stream
-  ... -----------------------------73793505419963331401738523176
-  ... Content-Disposition: form-data; name="field.data"; filename="hello.txt.gz"
-  ... Content-Type: application/x-gzip
-  ...
-  ... \x1f\x8b\x08\x08\xcb\x48\xea\x42\x00\x03\x68\x65\x6c\x6c\x6f\x2e\
-  ... \x74\x78\x74\x00\xcb\x48\xcd\xc9\xc9\xe7\x02\x00\x20\x30\x3a\x36\
-  ... \x06\x00\x00\x00
-  ... -----------------------------73793505419963331401738523176
-  ... Content-Disposition: form-data; name="UPDATE_SUBMIT"
-  ...
-  ... Add
-  ... -----------------------------73793505419963331401738523176
-  ... Content-Disposition: form-data; name="add_input_name"
-  ...
-  ...
-  ... -----------------------------73793505419963331401738523176--
-  ... """))
+  ... %b
+  ... """ % (content_type, content)))
   HTTP/1.1 303 See Other
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
@@ -98,7 +89,7 @@ Let us upload a binary file.
 Since we did not specify the object name in the form, Zope 3 will use the
 filename.
 
-  >>> response = http("""
+  >>> response = http(b"""
   ... GET /hello.txt.gz HTTP/1.1
   ... """)
   >>> print(response)
@@ -110,39 +101,29 @@ filename.
 
 Let's make sure the (binary) content of the file is correct
 
-  >>> response.getBody() == b'\x1f\x8b\x08\x08\xcbH\xeaB\x00\x03hello.txt\x00\xcbH\xcd\xc9\xc9\xe7\x02\x00 0:6\x06\x00\x00\x00'
+  >>> response.getBody() == hello_txt_gz
   True
 
 Also, lets test a (bad) filename with full path that generates MS Internet Explorer,
 Zope should process it successfully and get the actual filename. Let's upload the
 same file with bad filename.
 
+  >>> test_gz = (
+  ...   b'\x1f\x8b\x08\x08\xcb\x48\xea\x42\x00\x03\x68\x65\x6c\x6c\x6f\x2e'
+  ...   b'\x74\x78\x74\x00\xcb\x48\xcd\xc9\xc9\xe7\x02\x00\x20\x30\x3a\x36'
+  ...   b'\x06\x00\x00\x00')
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'application/octet-stream'),
+  ...     ('UPDATE_SUBMIT', 'Add'),
+  ...     ('add_input_name', '')],
+  ...    [('field.data', 'c:\\windows\\test.gz', test_gz, 'application/x-gzip')])
   >>> print(http(b"""
-  ... POST /+/zope.app.file.File%3D HTTP/1.1
+  ... POST /+/zope.app.file.File%%3D HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... Content-Type: multipart/form-data; boundary=---------------------------73793505419963331401738523176
+  ... Content-Type: %b
   ...
-  ... -----------------------------73793505419963331401738523176
-  ... Content-Disposition: form-data; name="field.contentType"
-  ...
-  ... application/octet-stream
-  ... -----------------------------73793505419963331401738523176
-  ... Content-Disposition: form-data; name="field.data"; filename="c:\\windows\\test.gz"
-  ... Content-Type: application/x-gzip
-  ...
-  ... \x1f\x8b\x08\x08\xcb\x48\xea\x42\x00\x03\x68\x65\x6c\x6c\x6f\x2e\
-  ... \x74\x78\x74\x00\xcb\x48\xcd\xc9\xc9\xe7\x02\x00\x20\x30\x3a\x36\
-  ... \x06\x00\x00\x00
-  ... -----------------------------73793505419963331401738523176
-  ... Content-Disposition: form-data; name="UPDATE_SUBMIT"
-  ...
-  ... Add
-  ... -----------------------------73793505419963331401738523176
-  ... Content-Disposition: form-data; name="add_input_name"
-  ...
-  ...
-  ... -----------------------------73793505419963331401738523176--
-  ... """))
+  ... %b
+  ... """ % (content_type, content)))
   HTTP/1.1 303 See Other
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
@@ -152,7 +133,7 @@ same file with bad filename.
 
 The file should be saved as "test.gz", let's check it name and contents.
 
-  >>> response = http("""
+  >>> response = http(b"""
   ... GET /test.gz HTTP/1.1
   ... """)
   >>> print(response)
@@ -163,7 +144,7 @@ The file should be saved as "test.gz", let's check it name and contents.
   ...
 
 
-  >>> response.getBody() == b'\x1f\x8b\x08\x08\xcbH\xeaB\x00\x03hello.txt\x00\xcbH\xcd\xc9\xc9\xe7\x02\x00 0:6\x06\x00\x00\x00'
+  >>> response.getBody() == test_gz
   True
 
 Text Files
@@ -171,30 +152,18 @@ Text Files
 
 Let us now create a text file.
 
-  >>> print(http(r"""
-  ... POST /+/zope.app.file.File%3D HTTP/1.1
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'text/plain'),
+  ...     ('UPDATE_SUBMIT', 'Add'),
+  ...     ('add_input_name', 'sample.txt')],
+  ...    [('field.data', '', b'', 'application/octet-stream')])
+  >>> print(http(b"""
+  ... POST /+/zope.app.file.File%%3D HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... Content-Type: multipart/form-data; boundary=---------------------------167769037320366690221542301033
+  ... Content-Type: %b
   ...
-  ... -----------------------------167769037320366690221542301033
-  ... Content-Disposition: form-data; name="field.contentType"
-  ...
-  ... text/plain
-  ... -----------------------------167769037320366690221542301033
-  ... Content-Disposition: form-data; name="field.data"; filename=""
-  ... Content-Type: application/octet-stream
-  ...
-  ...
-  ... -----------------------------167769037320366690221542301033
-  ... Content-Disposition: form-data; name="UPDATE_SUBMIT"
-  ...
-  ... Add
-  ... -----------------------------167769037320366690221542301033
-  ... Content-Disposition: form-data; name="add_input_name"
-  ...
-  ... sample.txt
-  ... -----------------------------167769037320366690221542301033--
-  ... """))
+  ... %b
+  ... """ % (content_type, content)))
   HTTP/1.1 303 See Other
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
@@ -204,7 +173,7 @@ Let us now create a text file.
 
 The file is initially empty, since we did not upload anything.
 
-  >>> print(http("""
+  >>> print(http(b"""
   ... GET /sample.txt HTTP/1.1
   ... """))
   HTTP/1.1 200 Ok
@@ -215,7 +184,7 @@ The file is initially empty, since we did not upload anything.
 
 Since it is a text file, we can edit it directly in a web form.
 
-  >>> print(http(r"""
+  >>> print(http(b"""
   ... GET /sample.txt/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """, handle_errors=False))
@@ -246,27 +215,17 @@ Since it is a text file, we can edit it directly in a web form.
 Files of type text/plain without any charset information can contain UTF-8 text.
 So you can use ASCII text.
 
-  >>> print(http(r"""
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'text/plain'),
+  ...     ('field.data', 'This is a sample text file.\n\nIt can contain US-ASCII characters.'),
+  ...     ('UPDATE_SUBMIT', 'Change')])
+  >>> print(http(b"""
   ... POST /sample.txt/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... Content-Type: multipart/form-data; boundary=---------------------------165727764114325486311042046845
+  ... Content-Type: %b
   ...
-  ... -----------------------------165727764114325486311042046845
-  ... Content-Disposition: form-data; name="field.contentType"
-  ...
-  ... text/plain
-  ... -----------------------------165727764114325486311042046845
-  ... Content-Disposition: form-data; name="field.data"
-  ...
-  ... This is a sample text file.
-  ...
-  ... It can contain US-ASCII characters.
-  ... -----------------------------165727764114325486311042046845
-  ... Content-Disposition: form-data; name="UPDATE_SUBMIT"
-  ...
-  ... Change
-  ... -----------------------------165727764114325486311042046845--
-  ... """, handle_errors=False))
+  ... %b
+  ... """ % (content_type, content), handle_errors=False))
   HTTP/1.1 200 Ok
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
@@ -301,7 +260,7 @@ So you can use ASCII text.
 
 Here's the file
 
-  >>> print(http(r"""
+  >>> print(http(b"""
   ... GET /sample.txt HTTP/1.1
   ... """))
   HTTP/1.1 200 Ok
@@ -319,27 +278,17 @@ Non-ASCII Text Files
 
 We can also use non-ASCII charactors in text file.
 
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'text/plain'),
+  ...     ('field.data', 'This is a sample text file.\n\nIt can contain non-ASCII(UTF-8) characters, e.g. \u263B (U+263B BLACK SMILING FACE).'),
+  ...     ('UPDATE_SUBMIT', 'Change')])
   >>> print(http(b"""
   ... POST /sample.txt/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... Content-Type: multipart/form-data; boundary=---------------------------165727764114325486311042046845
+  ... Content-Type: %b
   ...
-  ... -----------------------------165727764114325486311042046845
-  ... Content-Disposition: form-data; name="field.contentType"
-  ...
-  ... text/plain
-  ... -----------------------------165727764114325486311042046845
-  ... Content-Disposition: form-data; name="field.data"
-  ...
-  ... This is a sample text file.
-  ...
-  ... It can contain non-ASCII(UTF-8) characters, e.g. \xe2\x98\xbb (U+263B BLACK SMILING FACE).
-  ... -----------------------------165727764114325486311042046845
-  ... Content-Disposition: form-data; name="UPDATE_SUBMIT"
-  ...
-  ... Change
-  ... -----------------------------165727764114325486311042046845--
-  ... """))
+  ... %b
+  ... """ % (content_type, content)))
   HTTP/1.1 200 Ok
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
@@ -374,7 +323,7 @@ We can also use non-ASCII charactors in text file.
 
 Here's the file
 
-  >>> response = http(r"""
+  >>> response = http(b"""
   ... GET /sample.txt HTTP/1.1
   ... """)
   >>> print(response)
@@ -392,27 +341,17 @@ Here's the file
 
 And you can explicitly specify the charset. Note that the browser form is always UTF-8.
 
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'text/plain; charset=ISO-8859-1'),
+  ...     ('field.data', 'This is a sample text file.\n\nIt now contains Latin-1 characters, e.g. \xa7 (U+00A7 SECTION SIGN).'),
+  ...     ('UPDATE_SUBMIT', 'Change')])
   >>> print(http(b"""
   ... POST /sample.txt/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... Content-Type: multipart/form-data; boundary=---------------------------165727764114325486311042046845
+  ... Content-Type: %b
   ...
-  ... -----------------------------165727764114325486311042046845
-  ... Content-Disposition: form-data; name="field.contentType"
-  ...
-  ... text/plain; charset=ISO-8859-1
-  ... -----------------------------165727764114325486311042046845
-  ... Content-Disposition: form-data; name="field.data"
-  ...
-  ... This is a sample text file.
-  ...
-  ... It now contains Latin-1 characters, e.g. \xc2\xa7 (U+00A7 SECTION SIGN).
-  ... -----------------------------165727764114325486311042046845
-  ... Content-Disposition: form-data; name="UPDATE_SUBMIT"
-  ...
-  ... Change
-  ... -----------------------------165727764114325486311042046845--
-  ... """))
+  ... %b
+  ... """ % (content_type, content)))
   HTTP/1.1 200 Ok
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
@@ -447,7 +386,7 @@ And you can explicitly specify the charset. Note that the browser form is always
 
 Here's the file
 
-  >>> response = http(r"""
+  >>> response = http(b"""
   ... GET /sample.txt HTTP/1.1
   ... """)
   >>> print(response)
@@ -468,27 +407,17 @@ Body is actually encoded in ISO-8859-1, and not UTF-8
 The user is not allowed to specify a character set that cannot represent all
 the characters.
 
-  >>> print(http("""
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'text/plain; charset=US-ASCII'),
+  ...     ('field.data', 'This is a slightly changed sample text file.\n\nIt now contains Latin-1 characters, e.g. \xa7 (U+00A7 SECTION SIGN).'),
+  ...     ('UPDATE_SUBMIT', 'Change')])
+  >>> print(http(b"""
   ... POST /sample.txt/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... Content-Type: multipart/form-data; boundary=---------------------------165727764114325486311042046845
+  ... Content-Type: %b
   ...
-  ... -----------------------------165727764114325486311042046845
-  ... Content-Disposition: form-data; name="field.contentType"
-  ...
-  ... text/plain; charset=US-ASCII
-  ... -----------------------------165727764114325486311042046845
-  ... Content-Disposition: form-data; name="field.data"
-  ...
-  ... This is a slightly changed sample text file.
-  ...
-  ... It now contains Latin-1 characters, e.g. \xc2\xa7 (U+00A7 SECTION SIGN).
-  ... -----------------------------165727764114325486311042046845
-  ... Content-Disposition: form-data; name="UPDATE_SUBMIT"
-  ...
-  ... Change
-  ... -----------------------------165727764114325486311042046845--
-  ... """, handle_errors=False))
+  ... %b
+  ... """ % (content_type, content), handle_errors=False))
   HTTP/1.1 200 Ok
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
@@ -521,27 +450,17 @@ the characters.
 
 Likewise, the user is not allowed to specify a character set that is not supported by Python.
 
-  >>> print(http("""
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'text/plain; charset=I-INVENT-MY-OWN'),
+  ...     ('field.data', 'This is a slightly changed sample text file.\n\nIt now contains just ASCII characters.'),
+  ...     ('UPDATE_SUBMIT', 'Change')])
+  >>> print(http(b"""
   ... POST /sample.txt/edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... Content-Type: multipart/form-data; boundary=---------------------------165727764114325486311042046845
+  ... Content-Type: %b
   ...
-  ... -----------------------------165727764114325486311042046845
-  ... Content-Disposition: form-data; name="field.contentType"
-  ...
-  ... text/plain; charset=I-INVENT-MY-OWN
-  ... -----------------------------165727764114325486311042046845
-  ... Content-Disposition: form-data; name="field.data"
-  ...
-  ... This is a slightly changed sample text file.
-  ...
-  ... It now contains just ASCII characters.
-  ... -----------------------------165727764114325486311042046845
-  ... Content-Disposition: form-data; name="UPDATE_SUBMIT"
-  ...
-  ... Change
-  ... -----------------------------165727764114325486311042046845--
-  ... """, handle_errors=False))
+  ... %b
+  ... """ % (content_type, content), handle_errors=False))
   HTTP/1.1 200 Ok
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
@@ -575,7 +494,7 @@ Likewise, the user is not allowed to specify a character set that is not support
 If you trick Zope and upload a file with a content type that does not
 match the file contents, you will not be able to access the edit view:
 
-  >>> print(http(r"""
+  >>> print(http(b"""
   ... GET /hello.txt.gz/@@edit.html HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
   ... """, handle_errors=True))
@@ -592,32 +511,22 @@ Non-ASCII Filenames
 
 Filenames are not restricted to ASCII.
 
+  >>> björn_txt_gz = (
+  ...     b'\x1f\x8b\x08\x08\xcb\x48\xea\x42\x00\x03\x68\x65\x6c\x6c\x6f\x2e'
+  ...     b'\x74\x78\x74\x00\xcb\x48\xcd\xc9\xc9\xe7\x02\x00\x20\x30\x3a\x36'
+  ...     b'\x06\x00\x00\x00')
+  >>> content_type, content = encodeMultipartFormdata([
+  ...     ('field.contentType', 'application/octet-stream'),
+  ...     ('UPDATE_SUBMIT', 'Add'),
+  ...     ('add_input_name', '')],
+  ...    [('field.data', 'björn.txt.gz', björn_txt_gz, 'application/x-gzip')])
   >>> print(http(b"""
-  ... POST /+/zope.app.file.File%3D HTTP/1.1
+  ... POST /+/zope.app.file.File%%3D HTTP/1.1
   ... Authorization: Basic mgr:mgrpw
-  ... Content-Type: multipart/form-data; boundary=---------------------------73793505419963331401738523176
+  ... Content-Type: %b
   ...
-  ... -----------------------------73793505419963331401738523176
-  ... Content-Disposition: form-data; name="field.contentType"
-  ...
-  ... application/octet-stream
-  ... -----------------------------73793505419963331401738523176
-  ... Content-Disposition: form-data; name="field.data"; filename="bj\xc3\xb6rn.txt.gz"
-  ... Content-Type: application/x-gzip
-  ...
-  ... \x1f\x8b\x08\x08\xcb\x48\xea\x42\x00\x03\x68\x65\x6c\x6c\x6f\x2e\
-  ... \x74\x78\x74\x00\xcb\x48\xcd\xc9\xc9\xe7\x02\x00\x20\x30\x3a\x36\
-  ... \x06\x00\x00\x00
-  ... -----------------------------73793505419963331401738523176
-  ... Content-Disposition: form-data; name="UPDATE_SUBMIT"
-  ...
-  ... Add
-  ... -----------------------------73793505419963331401738523176
-  ... Content-Disposition: form-data; name="add_input_name"
-  ...
-  ...
-  ... -----------------------------73793505419963331401738523176--
-  ... """))
+  ... %b
+  ... """ % (content_type, content)))
   HTTP/1.1 303 See Other
   Content-Length: ...
   Content-Type: text/html;charset=utf-8
@@ -628,7 +537,7 @@ Filenames are not restricted to ASCII.
 Since we did not specify the object name in the form, Zope 3 will use the
 filename.
 
-  >>> response = http("""
+  >>> response = http(b"""
   ... GET /bj%C3%B6rn.txt.gz HTTP/1.1
   ... """)
   >>> print(response)
