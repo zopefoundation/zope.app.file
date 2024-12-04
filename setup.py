@@ -31,7 +31,7 @@ def read(*rnames):
 
 
 setup(name='zope.app.file',
-      version='5.0.dev0',
+      version='5.0',
       author='Zope Foundation and Contributors',
       author_email='zope-dev@zope.org',
       description='File and Image -- Zope 3 Content Components',
