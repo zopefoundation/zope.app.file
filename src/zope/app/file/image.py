@@ -149,7 +149,7 @@ def getImageInfo(data):
                     h, w = struct.unpack(b">HH", jpeg.read(4))
                     break
                 else:
-                    jpeg.read(int(struct.unpack(b">H", jpeg.read(2))[0])-2)
+                    jpeg.read(int(struct.unpack(b">H", jpeg.read(2))[0]) - 2)
                 b = jpeg.read(1)
             width = int(w)
             height = int(h)
