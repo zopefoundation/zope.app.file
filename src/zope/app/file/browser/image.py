@@ -65,22 +65,22 @@ class ImageData(FileView):
 
         if alt is None:
             alt = getattr(self, 'title', '')
-        result = '{} alt="{}"'.format(result, alt)
+        result = f'{result} alt="{alt}"'
 
         if height is not None:
-            result = '{} height="{}"'.format(result, height)
+            result = f'{result} height="{height}"'
 
         if width is not None:
-            result = '{} width="{}"'.format(result, width)
+            result = f'{result} width="{width}"'
 
         if 'border' not in [a.lower() for a in args]:
             result = '%s border="0"' % result
 
         if css_class is not None:
-            result = '{} class="{}"'.format(result, css_class)
+            result = f'{result} class="{css_class}"'
 
         for key, value in args.items():
-            result = '{} {}="{}"'.format(result, key, value)
+            result = f'{result} {key}="{value}"'
 
         return '%s />' % result
 
