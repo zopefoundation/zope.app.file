@@ -20,8 +20,8 @@ from io import BytesIO
 from xml.sax.saxutils import escape
 
 from webtest import TestApp
-from zope.interface.interfaces import ComponentLookupError
 from zope.app.wsgi.testlayer import encodeMultipartFormdata
+from zope.interface.interfaces import ComponentLookupError
 
 from zope.app.file.file import File
 from zope.app.file.image import Image
@@ -380,7 +380,8 @@ def test_suite():
     def _make_doctest(fname):
         test = doctest.DocFileSuite(
             fname,
-            globs={'http': http, 'encodeMultipartFormdata': encodeMultipartFormdata},
+            globs={'http': http,
+                   'encodeMultipartFormdata': encodeMultipartFormdata},
             optionflags=(doctest.ELLIPSIS
                          | doctest.NORMALIZE_WHITESPACE
                          | doctest.IGNORE_EXCEPTION_DETAIL))
